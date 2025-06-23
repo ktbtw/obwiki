@@ -113,18 +113,16 @@
 
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue';
-import api from '../api/index.ts'
+import api from '@/api/index'
 import { StarOutlined, LikeOutlined, MessageOutlined } from '@ant-design/icons-vue';
 //定义响应式数据
-const ebooks = ref();
+const ebooks = ref([]);
 //完成渲染后执行
 onMounted(() => {
   handleQueryEbook();
 })
-
 const handleQueryEbook = () => {
-  api.get("/ebook/list").then(resp => {
-    console.log(resp.data.content);
+  api.get("/ebook/all").then(resp => {
     ebooks.value = resp.data.content;
   });
 }
@@ -134,7 +132,6 @@ const actions: Record<string, any>[] = [
   { icon: LikeOutlined, text: '156' },
   { icon: MessageOutlined, text: '2' },
 ];
-
 </script>
 
 <style scoped>

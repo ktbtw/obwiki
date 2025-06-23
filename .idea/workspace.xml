@@ -4,8 +4,6 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7fc0b46c-dbff-4eb1-8b2c-590363f1acd8" name="Changes" comment="test">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,16 +21,16 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "FeliciaYu"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;FeliciaYu&quot;
   }
-}]]></component>
+}</component>
   <component name="GithubPullRequestsUISettings"><![CDATA[{
   "selectedUrlAndAccountId": {
-    "url": "git@github.com:/FeliciaYu/obwiki.git",
-    "accountId": "d0ffad88-667d-4663-85cf-1298bf1628dc"
+    "url": "https://github.com/Tsukishima1/obwiki",
+    "accountId": "631758a2-fef7-45da-b329-f2290697e74c"
   }
 }]]></component>
   <component name="MavenImportPreferences">
@@ -46,11 +44,14 @@
       </MavenGeneralSettings>
     </option>
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 3
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 3
+}</component>
   <component name="ProjectId" id="2ytCJmNvOGkIBui33Re3g9uJR2e" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
@@ -67,6 +68,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "Spring Boot.DemoApplication.executor": "Run",
     "Spring Boot.ObwikiApplication.executor": "Run",
+    "dart.analysis.tool.window.visible": "false",
     "git-widget-placeholder": "master",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -77,6 +79,7 @@
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.3034483",
     "settings.editor.selected.configurable": "MavenSettings",
+    "ts.external.directory.path": "C:\\Users\\17321\\IdeaProjects\\obwiki\\obwiki-frontend\\node_modules\\typescript\\lib",
     "vue.rearranger.settings.migration": "true"
   },
   "keyToStringList": {
@@ -123,10 +126,14 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue="JUnit.ObwikiApplicationTests" />
+      <item itemvalue="Spring Boot.ObwikiApplication" />
+      <item itemvalue="数据库脚本.wiki.sql" />
+    </list>
     <recent_temporary>
       <list>
         <item itemvalue="JUnit.ObwikiApplicationTests" />
-        <item itemvalue="Database Script.wiki.sql" />
       </list>
     </recent_temporary>
   </component>
@@ -137,6 +144,9 @@
         <option value="bundled-js-predefined-d6986cc7102b-b26f3e71634d-JavaScript-IU-251.26094.121" />
       </set>
     </attachedChunks>
+  </component>
+  <component name="StructureViewState">
+    <option name="selectedTab" value="逻辑" />
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="默认任务">

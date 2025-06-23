@@ -5,8 +5,8 @@ import lombok.ToString;
 
 @Data
 @ToString
-public class EbookQueryReq {
-    //主键
+public class EbookQueryReq extends PageReq {
+    //主键`
     private Long id;
     //海洋生物电子书名
     private String name;

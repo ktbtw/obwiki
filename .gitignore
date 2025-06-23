@@ -1,0 +1,16 @@
+# Java backend
+obwiki-backend/target/
+obwiki-backend/.idea/
+*.iml
+
+# Node frontend
+obwiki-frontend/node_modules/
+obwiki-frontend/dist/
+
+# IDEs
+*.log
+.DS_Store
+.vscode/
+
+# OS
+Thumbs.db

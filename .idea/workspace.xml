@@ -4,32 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7fc0b46c-dbff-4eb1-8b2c-590363f1acd8" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/obwiki-backend/src/main/java/com/example/obwiki/config/SwaggerConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/obwiki-backend/src/main/java/com/example/obwiki/config/xss/XssFilter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/obwiki-backend/src/main/java/com/example/obwiki/config/xss/XssHttpServletRequestWrapper.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/obwiki-backend/src/main/java/com/example/obwiki/controller/TestController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/obwiki-backend/src/main/java/com/example/obwiki/exception/BusinessException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/obwiki-backend/src/main/java/com/example/obwiki/exception/BusinessExceptionCode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/obwiki-backend/src/main/java/com/example/obwiki/exception/ObwikiExceptionAdvice.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/obwiki-backend/src/main/java/com/example/obwiki/rep/DemoReq.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/obwiki-backend/src/main/java/com/example/obwiki/resp/CommonResp.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/obwiki-backend/src/main/resources/logback-spring.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sqldialects.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/sqldialects.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obwiki-backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/obwiki-backend/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obwiki-backend/src/main/java/com/example/demo/DemoApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/obwiki-backend/src/main/java/com/example/obwiki/ObwikiApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obwiki-backend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/obwiki-backend/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obwiki-backend/src/test/java/com/example/demo/DemoApplicationTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/obwiki-backend/src/test/java/com/example/obwiki/ObwikiApplicationTests.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obwiki-backend/wiki.sql" beforeDir="false" afterPath="$PROJECT_DIR$/obwiki-backend/wiki.sql" afterDir="false" />
-    </list>
+    <list default="true" id="7fc0b46c-dbff-4eb1-8b2c-590363f1acd8" name="Changes" comment="搭建后端环境" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -168,8 +143,17 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1700659874416</updated>
-      <workItem from="1750644415159" duration="5177000" />
+      <workItem from="1750644415159" duration="5562000" />
     </task>
+    <task id="LOCAL-00001" summary="搭建后端环境">
+      <option name="closed" value="true" />
+      <created>1750649978462</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1750649978463</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -185,5 +169,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="搭建后端环境" />
+    <option name="LAST_COMMIT_MESSAGE" value="搭建后端环境" />
   </component>
 </project>

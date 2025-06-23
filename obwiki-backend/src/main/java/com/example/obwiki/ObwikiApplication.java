@@ -20,6 +20,7 @@ public class ObwikiApplication {
         SpringApplication app = new SpringApplication(ObwikiApplication.class);
         ConfigurableEnvironment env = app.run(args).getEnvironment();
 
+        System.out.println("wyx");
 
 
 

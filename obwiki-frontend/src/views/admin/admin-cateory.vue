@@ -29,8 +29,8 @@
 
       <a-table
         :columns="columns"
-        :row-key="record => record.id"
-        :data-source="ebooks"
+        :row-key="(record: any) => record.id"
+        :data-source="cateorys"
         :pagination="pagination"
         :loading="loading"
         @change="handleTableChange"
@@ -69,21 +69,21 @@
       :confirm-loading="modalLoading"
       @ok="handleModalOk"
     >
-      <a-form :model="ebook" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
+      <a-form :model="cateory" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="封面">
-          <a-input v-model:value="ebook.cover" />
+          <a-input v-model:value="cateory.cover" />
         </a-form-item>
         <a-form-item label="名称">
-          <a-input v-model:value="ebook.name" />
+          <a-input v-model:value="cateory.name" />
         </a-form-item>
         <a-form-item label="分类一">
-          <a-input v-model:value="ebook.category1Id" />
+          <a-input v-model:value="cateory.category1Id" />
         </a-form-item>
         <a-form-item label="分类二">
-          <a-input v-model:value="ebook.category2Id" />
+          <a-input v-model:value="cateory.category2Id" />
         </a-form-item>
         <a-form-item label="描述">
-          <a-textarea v-model:value="ebook.description" type="textarea" />
+          <a-textarea v-model:value="cateory.description" type="textarea" />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -97,27 +97,27 @@ import { ref, onMounted } from 'vue';
 import api from '@/api/index'
 import { Tool } from "@/utils/tool";
 
-const ebooks = ref([]);//定义查询电子书返回集合
+const cateorys = ref([]);//定义查询电子书返回集合
 // 编辑相关功能
-const ebook = ref();
+const cateory = ref();
 const modalVisible = ref(false);
 const modalLoading = ref(false);
 //编辑
 const edit = (record:any)=>{
   modalVisible.value =true;
-  ebook.value = Tool.copy(record);
+  cateory.value = Tool.copy(record);
 }
 
 //新增
 const add = ()=>{
   modalVisible.value =true;
   //清空对话框数据
-  ebook.value = {};
+  cateory.value = {};
 }
 
 //删除
 const handleDelete = (id:number)=>{
-  api.delete('/ebook/delete/'+id).then((resp)=>{
+  api.delete('/cateory/delete/'+id).then((resp)=>{
     if (resp.data.success){
       //重新加载列表
       handleQuery({
@@ -130,7 +130,7 @@ const handleDelete = (id:number)=>{
 
 const handleModalOk = ()=>{
   modalLoading.value = true;
-  api.post("/ebook/save",ebook.value).then(resp =>{
+  api.post("/cateory/save",cateory.value).then(resp =>{
     //回去返回参数
     const data = resp.data;
     if(data.success){
@@ -207,7 +207,7 @@ param.value = {};
 * */
 const handleQuery = (params:any)=>{
   loading.value = true;
-  api.get("/ebook/list",{
+  api.get("/cateory/list",{
     params:{
       page:params.page,
       size:params.size,
@@ -217,7 +217,7 @@ const handleQuery = (params:any)=>{
     const data = resp.data;
     if (data.success){
       //获取查询数据
-      ebooks.value = data.content.list;
+      cateorys.value = data.content.list;
       //重置分页按钮
       pagination.value.current = params.page;
       //设置总条数

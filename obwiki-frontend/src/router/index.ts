@@ -8,6 +8,11 @@ const routes: Array<RouteRecordRaw> = [
     component: HomeView
   },
   {
+    path: '/admin/category',
+    name: 'AdminCategory',
+    component: () => import( '../views/admin/admin-category.vue')
+  },
+  {
     path: '/about',
     name: 'about',
     component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
@@ -15,7 +20,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/admin/ebook',
     name: 'AdminEbook',
-    component: () => import( '../views/admin/admin-ebook.vue')
+    component: () => import( '../views/admin/admin-cateory.vue')
   }
 ]
 

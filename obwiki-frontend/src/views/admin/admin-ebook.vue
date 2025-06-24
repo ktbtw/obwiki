@@ -35,7 +35,6 @@
               </a-button>
             </a-form-item>
           </a-form>
-        </p>
 
         <a-table
           :columns="columns"
@@ -52,7 +51,6 @@
                 alt="图片加载失败"
                 style="width:80px;height:80px"
               />
-              <!-- <p>我图图呢</p> -->
             </template>
 
 

@@ -4,8 +4,7 @@
     海洋生物电子书
     <a-layout>
       <a-layout-content
-        :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }"
-      >
+        :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }">
         <p>
           <a-form
             layout="inline"
@@ -47,12 +46,14 @@
             <template #bodyCell="{column, record}">
               <template v-if="column.key === 'cover'">
                 <a-image
-                  :src="'/public' + record.cover"
+                  :src="record.cover"
                   alt="图片加载失败"
-                  style="width:80px;height:80px"
-                />
+                  style="width:80px;height:80px"/>
               </template>
 
+              <template v-if="column.key === 'category'">
+                <span>{{ getCategoryName(record.category1Id) }}/{{ getCategoryName(record.category2Id) }}</span>
+              </template>
 
               <template v-if="column.dataIndex === 'action'">
                 <a-space size="small">
@@ -97,12 +98,13 @@
         <a-form-item label="名称">
           <a-input v-model:value="ebook.name" />
         </a-form-item>
-        <a-form-item label="分类一">
-          <a-input v-model:value="ebook.category1Id" />
-        </a-form-item>
-        <a-form-item label="分类二">
-          <a-input v-model:value="ebook.category2Id" />
-        </a-form-item>
+        <a-form-item label="分类">
+          <a-cascader
+            v-model:value="categoryIds"
+            :field-names="{ label: 'name', value: 'id', children: 'children' }"
+            :options="level1"
+          />
+        </a-form-item >
         <a-form-item label="描述">
           <a-textarea
             v-model:value="ebook.description"
@@ -119,6 +121,7 @@
 import { ref, onMounted } from 'vue';
 import { Tool } from "@/utils/tool";
 import api from '@/api/index'
+import {message} from "ant-design-vue";
 
 const ebooks = ref([]);//定义查询电子书返回集合
 // 编辑相关功能
@@ -143,13 +146,9 @@ const columns = [
     dataIndex: 'name'
   },
   {
-    title: '分类一',
-    key: 'category1Id',
+    title: '分类',
+    key: 'category',
     dataIndex: 'category1Id'
-  },
-  {
-    title: '分类二',
-    dataIndex: 'category2Id'
   },
   {
     title: '文档数',
@@ -179,7 +178,7 @@ param.value = {};
 
 // 定义电子书接口
 interface Ebook {
-  id?: number;
+  id?: string;
   cover?: string;
   name?: string;
   category1Id?: number;
@@ -189,11 +188,16 @@ interface Ebook {
   viewCount?: number;
   voteCount?: number;
 }
+//查询分类数据级联展示
+const categoryIds = ref<string[]>([]); //保存选中分类数组[100:101] 对应海洋植物:藻类植物
+const level1 = ref();//保存分类数据
+let categorys:any;
 
 //编辑
 const handleEdit = (record:any)=>{
   modalVisible.value =true;
   ebook.value = Tool.copy(record);
+  categoryIds.value = [record.category1Id, record.category2Id];
 }
 
 //新增
@@ -217,22 +221,28 @@ const handleDelete = (id:number)=>{
   })
 }
 
-const handleModalOk = ()=>{
+const handleModalOk = () => {
   modalLoading.value = true;
-  api.post("/ebook/save",ebook.value).then(resp =>{
-    //回去返回参数
+
+  //获取分类1 及分类2的值
+  ebook.value.category1Id = categoryIds.value[0];
+  ebook.value.category2Id = categoryIds.value[1];
+
+  api.post("/ebook/save",ebook.value).then((resp)=>{
     const data = resp.data;
-    if(data.success){
-      modalLoading.value = false;//关闭等待
-      modalVisible.value = false;//关闭对话框
+    if (data.success){
+      modalVisible.value = false;
+      modalLoading.value = false;
       //重新加载列表
       handleQuery({
         page:pagination.value.current,
         size:pagination.value.pageSize
       })
+    } else {
+      message.error(data.message);
     }
   })
-}
+};
 
 /*
 * 数据查询
@@ -247,6 +257,7 @@ const handleQuery = (params:any)=>{
     }}).then((resp)=>{
     loading.value = false;
     const data = resp.data;
+
     if (data.success){
       //获取查询数据
       ebooks.value = data.content.list;
@@ -261,21 +272,51 @@ const handleQuery = (params:any)=>{
 * 表格点击页码时触发
 * */
 const handleTableChange =(pagination:any)=>{
-  console.log("看看自带分页的参数都有些啥："+pagination);
   handleQuery({
     page:pagination.current,
     size:pagination.pageSize
   });
 };
 
-onMounted(() => {
-  // 页面加载时查询数据
-  handleQuery({
-    // 默认查询第一页数据
-    page: 1,
-    // 每页显示5条数据
-    size: pagination.value.pageSize
+const  handleQueryCategory = ()=>{
+  loading.value = true;
+  api.get("/category/all").then((resp)=>{
+    loading.value = false;
+    const  data = resp.data;
+    console.log(data);
+    categorys = data.content;
+
+    if (data.success){
+      level1.value = [];
+      level1.value = Tool.array2Tree(categorys,0);
+
+      //加载完分类后，再加载电子书，否则如果分类树加载很慢，则电子书的渲染会报错
+      handleQuery({
+        page:1,
+        size:pagination.value.pageSize
+      });
+    } else {
+      message.error(data.message);
+    }
   });
+};
+
+const getCategoryName = (cid:string)=>{
+  // //传递的cid为number类型 与categorys中的id为string类型 需要修改
+  // console.log(cid)
+  // let cidstr:string = cid.toString();
+  // let result = "";
+  //
+  // categorys.forEach((item:any)=>{
+  //   if (item.id === cidstr){
+  //     result = item.name;
+  //   }
+  // });
+  // return result;
+}
+
+onMounted(() => {
+  handleQueryCategory();
 })
 
 </script>

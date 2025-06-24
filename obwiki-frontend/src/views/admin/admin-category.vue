@@ -59,7 +59,15 @@
           <a-input v-model:value="category.name" />
         </a-form-item>
         <a-form-item label="父分类">
-          <a-input v-model:value="category.parent" />
+          <a-select
+            ref="select"
+            v-model:value="category.parent"
+            style="width: 120px"
+          >
+
+            <a-select-option value="0">无</a-select-option>
+            <a-select-option v-for="c in level1"  :key="c.id" :value="c.id" :disabled="category.id === c.id" >{{c.name}}</a-select-option>
+          </a-select>
         </a-form-item>
         <a-form-item label="排序">
           <a-input v-model:value="category.sort" />
@@ -76,6 +84,7 @@
 import { ref, onMounted } from 'vue';
 import api from '@/api/index'
 import { Tool } from "@/utils/tool";
+import { message } from 'ant-design-vue';
 
 const categorys = ref([]);//定义查询电子书返回集合
 // 编辑相关功能
@@ -119,12 +128,27 @@ const add = ()=>{
 //删除
 const handleDelete = (id:bigint)=>{
   console.log("id:",id)
-  api.delete('/category/delete/'+id).then((resp)=>{
-    if (resp.data.success){
-      //重新加载列表
-      handleQuery();
+  let array = level1.value;
+  let len = 0;//子节点数组长度
+  for (let i = 0; i < array.length; i++) {
+    let c = array[i];
+    if (String(c.id) === String(id)){
+      if(array[i].children){
+        //找到该分类 判断是否存有子节点
+        len = array[i].children.length
+      }
     }
-  })
+  }
+  if(len>0){
+    message.warning("该节点包含子节点,不能删除");
+  }else{
+    api.delete('/category/delete/'+id).then((resp)=>{
+      if (resp.data.success){
+        //重新加载列表
+        handleQuery();
+      }
+    })
+  }
 }
 
 const handleModalOk = ()=>{
@@ -141,10 +165,6 @@ const handleModalOk = ()=>{
   })
 }
 
-
-onMounted(() => {
-  handleQuery();
-})
 //数据查询 查询不携带参数
 //定义树形结构 数组
 const level1 = ref();
@@ -163,5 +183,8 @@ const  handleQuery = ()=>{
   });
 };
 
+onMounted(() => {
+  handleQuery();
+})
 
 </script>

@@ -2,6 +2,7 @@ package com.example.obwiki.exception;
 
 import com.example.obwiki.resp.CommonResp;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -37,10 +38,24 @@ public class ObwikiExceptionAdvice {
     }
 
 
-    //处理 系统异常
+    //处理系统异常
     @ExceptionHandler(Exception.class)
     public CommonResp handlerException(Exception e){
         log.error(e.getMessage(),e);
         return new CommonResp(false,"未知异常,请联系管理员",null);
+    }
+
+    //处理参数校验异常
+    @ExceptionHandler(BindException.class)
+    public CommonResp handleBindException(BindException e) {
+        log.error("请求参数校验失败：{}", e.getMessage());
+        BindingResult result = e.getBindingResult();
+        Map<String, String> errorMap = new HashMap<>();
+        result.getFieldErrors().forEach(item -> {
+            String field = item.getField();
+            String message = item.getDefaultMessage();
+            errorMap.put(field, message);
+        });
+        return new CommonResp(false, "数据校验异常", errorMap);
     }
 }

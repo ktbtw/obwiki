@@ -36,46 +36,47 @@
             </a-form-item>
           </a-form>
 
-        <a-table
-          :columns="columns"
-          :row-key="(record:Ebook) => record.id"
-          :data-source="ebooks"
-          :pagination="pagination"
-          :loading="loading"
-          @change="handleTableChange"
-        >
-          <template #bodyCell="{column, record}">
-            <template v-if="column.key === 'cover'">
-              <a-image
-                :src="'/public' + record.cover"
-                alt="图片加载失败"
-                style="width:80px;height:80px"
-              />
-            </template>
+          <a-table
+            :columns="columns"
+            :row-key="(record:Ebook) => record.id"
+            :data-source="ebooks"
+            :pagination="pagination"
+            :loading="loading"
+            @change="handleTableChange"
+          >
+            <template #bodyCell="{column, record}">
+              <template v-if="column.key === 'cover'">
+                <a-image
+                  :src="'/public' + record.cover"
+                  alt="图片加载失败"
+                  style="width:80px;height:80px"
+                />
+              </template>
 
 
-            <template v-if="column.dataIndex === 'action'">
-              <a-space size="small">
-                <a-button
-                  type="primary"
-                  @click="handleEdit(record)"
-                >
-                  编辑
-                </a-button>
-                <a-popconfirm
-                  title="删除后不可以恢复，确认删除?"
-                  ok-text="是"
-                  cancel-text="否"
-                  @confirm="handleDelete(record.id)"
-                >
-                  <a-button type="danger">
-                    删除
+              <template v-if="column.dataIndex === 'action'">
+                <a-space size="small">
+                  <a-button
+                    type="primary"
+                    @click="handleEdit(record)"
+                  >
+                    编辑
                   </a-button>
-                </a-popconfirm>
-              </a-space>
+                  <a-popconfirm
+                    title="删除后不可以恢复，确认删除?"
+                    ok-text="是"
+                    cancel-text="否"
+                    @confirm="handleDelete(record.id)"
+                  >
+                    <a-button type="danger">
+                      删除
+                    </a-button>
+                  </a-popconfirm>
+                </a-space>
+              </template>
             </template>
-          </template>
-        </a-table>
+          </a-table>
+        </p>
       </a-layout-content>
     </a-layout>
 

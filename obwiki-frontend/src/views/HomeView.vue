@@ -117,6 +117,8 @@ import api from '@/api/index'
 import { StarOutlined, LikeOutlined, MessageOutlined } from '@ant-design/icons-vue';
 //定义响应式数据
 const ebooks = ref([]);
+const openKeys = ref([]);
+const selectedKeys2 = ref([]);
 //完成渲染后执行
 onMounted(() => {
   handleQueryEbook();

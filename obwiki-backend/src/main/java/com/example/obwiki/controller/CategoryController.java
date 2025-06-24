@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
 
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * <p>
@@ -22,7 +23,7 @@ import javax.validation.Valid;
  */
 
 @RestController
-@RequestMapping("/category")
+@RequestMapping("/obwiki/category")
 public class CategoryController {
 
     @Autowired
@@ -36,6 +37,14 @@ public class CategoryController {
         PageResp<CategoryQueryResp> pageResp = categoryService.listByname(req);
         resp.setContent(pageResp);
 
+        return resp;
+    }
+    @GetMapping("/all")
+    public CommonResp all() {
+        CommonResp<List<CategoryQueryResp>> resp = new CommonResp<>(true,"查询成功",null);
+
+        List<CategoryQueryResp> list = categoryService.all();
+        resp.setContent(list);
         return resp;
     }
 

@@ -20,7 +20,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/admin/ebook',
     name: 'AdminEbook',
-    component: () => import( '../views/admin/admin-cateory.vue')
+    component: () => import( '../views/admin/admin-ebook.vue')
   }
 ]
 

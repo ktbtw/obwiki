@@ -7,6 +7,8 @@ import com.example.obwiki.rep.CategorySaveReq;
 import com.example.obwiki.resp.CategoryQueryResp;
 import com.example.obwiki.resp.PageResp;
 
+import java.util.List;
+
 /**
  * <p>
  *  服务类
@@ -20,6 +22,8 @@ public interface ICategoryService extends IService<Category> {
     PageResp<CategoryQueryResp> listByname(CategoryQueryReq req);
 
     void save(CategorySaveReq req);
+
+    List<CategoryQueryResp> all();
 
     void delete(Long id);
 }

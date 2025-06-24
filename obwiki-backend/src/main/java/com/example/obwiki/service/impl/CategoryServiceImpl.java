@@ -64,7 +64,13 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
             this.baseMapper.updateById(category);
         }
     }
-
+    @Override
+    public List<CategoryQueryResp> all() {
+        //使用 sort 列进行排序
+        List<Category> categories = this.baseMapper.selectList(new QueryWrapper<Category>().orderByAsc("sort"));
+        List<CategoryQueryResp> list = CopyUtil.copyList(categories, CategoryQueryResp.class);
+        return list;
+    }
     @Override
     public void delete(Long id) {
         this.baseMapper.deleteById(id);

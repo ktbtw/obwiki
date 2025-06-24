@@ -1,80 +1,33 @@
 <template>
   <div>
     <a-layout>
-      <a-layout-sider
-        width="200"
-        style="background: #fff"
-      >
+      <a-layout-sider width="200" style="background: #fff">
         <a-menu
-          v-model:selectedKeys="selectedKeys2"
-          :open-keys="openKeys"
           mode="inline"
           style="height: 100%"
+          @click="handleClick"
         >
-          <a-sub-menu key="sub1">
-            <template #title>
-              <span>
-                <user-outlined />
-                subnav 11111
-              </span>
+          <a-menu-item key="welcome">
+            <MailOutlined />
+            <span>欢迎</span>
+          </a-menu-item>
+          <a-sub-menu v-for="item in level1" :key="item.id" >
+            <template v-slot:title>
+              <span><user-outlined />{{item.name}}</span>
             </template>
-            <a-menu-item key="1">
-              option1
-            </a-menu-item>
-            <a-menu-item key="2">
-              option2
-            </a-menu-item>
-            <a-menu-item key="3">
-              option3
-            </a-menu-item>
-            <a-menu-item key="4">
-              option4
-            </a-menu-item>
-          </a-sub-menu>
-          <a-sub-menu key="sub2">
-            <template #title>
-              <span>
-                <laptop-outlined />
-                subnav 2
-              </span>
-            </template>
-            <a-menu-item key="5">
-              option5
-            </a-menu-item>
-            <a-menu-item key="6">
-              option6
-            </a-menu-item>
-            <a-menu-item key="7">
-              option7
-            </a-menu-item>
-            <a-menu-item key="8">
-              option8
-            </a-menu-item>
-          </a-sub-menu>
-          <a-sub-menu key="sub3">
-            <template #title>
-              <span>
-                <notification-outlined />
-                subnav 3
-              </span>
-            </template>
-            <a-menu-item key="9">
-              option9
-            </a-menu-item>
-            <a-menu-item key="10">
-              option10
-            </a-menu-item>
-            <a-menu-item key="11">
-              option11
-            </a-menu-item>
-            <a-menu-item key="12">
-              option12
+            <a-menu-item v-for="child in item.children" :key="child.id">
+              <MailOutlined /><span>{{child.name}}</span>
             </a-menu-item>
           </a-sub-menu>
         </a-menu>
       </a-layout-sider>
+
       <a-layout-content :style="{ padding: '0 24px', minHeight: '280px' }">
+        <div class="welcome" v-show="isShowWelcome">
+          <h1>欢迎</h1>
+        </div>
         <a-list
+          v-show="!isShowWelcome"
           item-layout="vertical"
           size="large"
           :grid="{ gutter: 20, column: 3 }"
@@ -114,19 +67,37 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue';
 import api from '@/api/index'
+import {Tool} from '@/utils/tool';
+import {message} from 'ant-design-vue';
 import { StarOutlined, LikeOutlined, MessageOutlined } from '@ant-design/icons-vue';
 //定义响应式数据
 const ebooks = ref([]);
 const openKeys = ref([]);
 const selectedKeys2 = ref([]);
-//完成渲染后执行
-onMounted(() => {
-  handleQueryEbook();
-})
-const handleQueryEbook = () => {
-  api.get("/ebook/all").then(resp => {
-    ebooks.value = resp.data.content;
-  });
+
+//修改查询方法 携带分类id参数
+const handleQueryEbook = ()=>{
+  api.get("/ebook/list",{
+    params:{
+      page:1,
+      size:1000,
+      categoryId2:categoryId2
+    }
+  }).then((resp)=>{
+    ebooks.value = resp.data.content.list;
+  })
+}
+const isShowWelcome = ref(true);
+let categoryId2 = 0;
+//点击分类导航栏 获取选中id,发送查询请求
+const handleClick = (value:any)=>{
+  if (value.key === 'welcome'){
+    isShowWelcome.value = true;
+  } else {
+    categoryId2 = value.key;
+    isShowWelcome.value = false;
+    handleQueryEbook();
+  }
 }
 
 const actions: Record<string, any>[] = [
@@ -134,6 +105,30 @@ const actions: Record<string, any>[] = [
   { icon: LikeOutlined, text: '156' },
   { icon: MessageOutlined, text: '2' },
 ];
+
+/*
+  * 分类相关
+  * */
+const level1 = ref();
+const  handleQueryCategory = ()=>{
+  api.get("/category/all").then((resp)=>{
+    const  data = resp.data;
+
+    if (data.success){
+      console.log("原始数组",data.content);
+
+      level1.value = [];
+      level1.value = Tool.array2Tree(data.content,0);
+      console.log("树形结构：",level1);
+    } else {
+      message.error(data.message);
+    }
+  });
+};
+//完成渲染后执行
+onMounted(()=>{
+  handleQueryCategory();
+})
 </script>
 
 <style scoped>

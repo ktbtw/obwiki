@@ -2,6 +2,10 @@ package com.example.obwiki.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 
 /**
@@ -12,6 +16,9 @@ import java.io.Serializable;
  * @author cr
  * @since 2025-06-23
  */
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor  // 生成全参构造器
 public class Ebook implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -20,7 +27,7 @@ public class Ebook implements Serializable {
      * id
      */
     @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
+    private String id;
 
     /**
      * 名称
@@ -50,24 +57,26 @@ public class Ebook implements Serializable {
     /**
      * 文档数
      */
-    private Integer docCount;
+    @Builder.Default
+    private Integer docCount=0;
 
     /**
      * 阅读数
      */
-    private Integer viewCount;
+    @Builder.Default
+    private Integer viewCount=0;
 
     /**
      * 点赞数
      */
-    private Integer voteCount;
+    @Builder.Default
+    private Integer voteCount=0;
 
-
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

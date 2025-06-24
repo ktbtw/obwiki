@@ -45,8 +45,9 @@ public class EbookServiceImpl extends ServiceImpl<EbookMapper, Ebook> implements
         Page<Ebook> page = new Page<>(req.getPage(),req.getSize());
         page = this.baseMapper.selectPage(page, queryWrapper);
 
-
+        System.out.println("数据库查询实体："+page.getRecords());
         List<EbookQueryResp> resps = CopyUtil.copyList(page.getRecords(), EbookQueryResp.class);
+        System.out.println("转化后的DTO："+resps);
         //创建返回对象
         PageResp<EbookQueryResp> pageResp = new PageResp<>();
         pageResp.setList(resps);
@@ -60,7 +61,7 @@ public class EbookServiceImpl extends ServiceImpl<EbookMapper, Ebook> implements
         if (ObjectUtils.isEmpty(req.getId())) {
             // 雪花算法生成id
             long id = snowFlake.nextId();
-            ebook.setId(id);
+            ebook.setId(String.valueOf(id));
             // 新增
             this.baseMapper.insert(ebook);
         } else {
@@ -72,6 +73,7 @@ public class EbookServiceImpl extends ServiceImpl<EbookMapper, Ebook> implements
     //删除
     @Override
     public void delete(Long id) {
+
         this.baseMapper.deleteById(id);
     }
 

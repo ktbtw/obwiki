@@ -4,7 +4,8 @@
     海洋生物电子书
     <a-layout>
       <a-layout-content
-        :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }">
+        :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }"
+      >
         <p>
           <a-form
             layout="inline"
@@ -48,7 +49,8 @@
                 <a-image
                   :src="record.cover"
                   alt="图片加载失败"
-                  style="width:80px;height:80px"/>
+                  style="width:80px;height:80px"
+                />
               </template>
 
               <template v-if="column.key === 'category'">
@@ -103,8 +105,11 @@
             v-model:value="categoryIds"
             :field-names="{ label: 'name', value: 'id', children: 'children' }"
             :options="level1"
+            @change="(value:string) => {
+              console.log('选中的分类ID:', value);
+            }"
           />
-        </a-form-item >
+        </a-form-item>
         <a-form-item label="描述">
           <a-textarea
             v-model:value="ebook.description"
@@ -197,7 +202,7 @@ let categorys:any;
 const handleEdit = (record:any)=>{
   modalVisible.value =true;
   ebook.value = Tool.copy(record);
-  categoryIds.value = [record.category1Id, record.category2Id];
+  categoryIds.value = [record.category1Id.toString(), record.category2Id.toString()];
 }
 
 //新增
@@ -224,12 +229,19 @@ const handleDelete = (id:number)=>{
 const handleModalOk = () => {
   modalLoading.value = true;
 
-  //获取分类1 及分类2的值
-  ebook.value.category1Id = categoryIds.value[0];
-  ebook.value.category2Id = categoryIds.value[1];
+  //获取分类1 及分类2的值, 转换为数字
+  if (categoryIds.value.length === 2) {
+    ebook.value.category1Id = parseInt(categoryIds.value[0]);
+    ebook.value.category2Id = parseInt(categoryIds.value[1]);
+  } else {
+    message.error("请选择分类");
+    modalLoading.value = false;
+    return;
+  }
 
   api.post("/ebook/save",ebook.value).then((resp)=>{
     const data = resp.data;
+    console.log("电子书保存返回数据：",data);
     if (data.success){
       modalVisible.value = false;
       modalLoading.value = false;
@@ -238,6 +250,7 @@ const handleModalOk = () => {
         page:pagination.value.current,
         size:pagination.value.pageSize
       })
+      console.log("重新加载了")
     } else {
       message.error(data.message);
     }
@@ -283,8 +296,8 @@ const  handleQueryCategory = ()=>{
   api.get("/category/all").then((resp)=>{
     loading.value = false;
     const  data = resp.data;
-    console.log(data);
     categorys = data.content;
+    // 此处id就是字符串
 
     if (data.success){
       level1.value = [];
@@ -302,17 +315,16 @@ const  handleQueryCategory = ()=>{
 };
 
 const getCategoryName = (cid:string)=>{
-  // //传递的cid为number类型 与categorys中的id为string类型 需要修改
-  // console.log(cid)
-  // let cidstr:string = cid.toString();
-  // let result = "";
-  //
-  // categorys.forEach((item:any)=>{
-  //   if (item.id === cidstr){
-  //     result = item.name;
-  //   }
-  // });
-  // return result;
+  //传递的cid为number类型 与categorys中的id为string类型 需要修改
+  let cidstr:string = cid.toString();
+  let result = "";
+
+  categorys.forEach((item:any)=>{
+    if (item.id === cidstr){
+      result = item.name;
+    }
+  });
+  return result;
 }
 
 onMounted(() => {

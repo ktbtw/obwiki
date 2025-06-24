@@ -2,6 +2,12 @@ package com.example.obwiki.service;
 
 import com.example.obwiki.entity.Doc;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.obwiki.rep.DocQueryReq;
+import com.example.obwiki.rep.DocSaveReq;
+import com.example.obwiki.resp.DocQueryResp;
+import com.example.obwiki.resp.PageResp;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +19,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IDocService extends IService<Doc> {
 
+    PageResp<DocQueryResp> listByname(DocQueryReq req);
+
+    void save(DocSaveReq req);
+
+    void delete(Long id);
+
+    List<DocQueryResp> all();
 }

@@ -1,7 +1,10 @@
 <template>
   <div>
     <a-layout>
-      <a-layout-sider width="200" style="background: #fff">
+      <a-layout-sider
+        width="200"
+        style="background: #fff"
+      >
         <a-menu
           mode="inline"
           style="height: 100%"
@@ -11,19 +14,28 @@
             <MailOutlined />
             <span>欢迎</span>
           </a-menu-item>
-          <a-sub-menu v-for="item in level1" :key="item.id" >
-            <template v-slot:title>
-              <span><user-outlined />{{item.name}}</span>
+          <a-sub-menu
+            v-for="item in level1"
+            :key="item.id"
+          >
+            <template #title>
+              <span><user-outlined />{{ item.name }}</span>
             </template>
-            <a-menu-item v-for="child in item.children" :key="child.id">
-              <MailOutlined /><span>{{child.name}}</span>
+            <a-menu-item
+              v-for="child in item.children"
+              :key="child.id"
+            >
+              <MailOutlined /><span>{{ child.name }}</span>
             </a-menu-item>
           </a-sub-menu>
         </a-menu>
       </a-layout-sider>
 
       <a-layout-content :style="{ padding: '0 24px', minHeight: '280px' }">
-        <div class="welcome" v-show="isShowWelcome">
+        <div
+          v-show="isShowWelcome"
+          class="welcome"
+        >
           <h1>欢迎</h1>
         </div>
         <a-list
@@ -115,11 +127,10 @@ const  handleQueryCategory = ()=>{
     const  data = resp.data;
 
     if (data.success){
-      console.log("原始数组",data.content);
 
       level1.value = [];
       level1.value = Tool.array2Tree(data.content,0);
-      console.log("树形结构：",level1);
+
     } else {
       message.error(data.message);
     }
@@ -138,5 +149,6 @@ onMounted(()=>{
   line-height: 50px;
   border-radius: 8%;
   margin: 5px 0;
+  margin-right: 10px;
 }
 </style>

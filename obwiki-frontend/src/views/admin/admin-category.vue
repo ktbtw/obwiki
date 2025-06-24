@@ -5,9 +5,15 @@
         :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }"
       >
         <p>
-          <a-form layout="inline" :model="param">
+          <a-form
+            layout="inline"
+            :model="param"
+          >
             <a-form-item>
-              <a-button type="primary" @click="add()">
+              <a-button
+                type="primary"
+                @click="add()"
+              >
                 新增
               </a-button>
             </a-form-item>
@@ -17,16 +23,18 @@
 
         <a-table
           :columns="columns"
-          :row-key="record => record.id"
+          :row-key="(record:Category) => record.id"
           :data-source="level1"
           :pagination="false"
           :loading="loading"
         >
           <template #bodyCell="{ column,record}">
-
             <template v-if="column.dataIndex === 'action'">
               <a-space size="small">
-                <a-button type="primary"  @click="edit(record)">
+                <a-button
+                  type="primary"
+                  @click="edit(record)"
+                >
                   编辑
                 </a-button>
                 <a-popconfirm
@@ -35,7 +43,7 @@
                   cancel-text="否"
                   @confirm="handleDelete(record.id)"
                 >
-                  <a-button danger >
+                  <a-button danger>
                     删除
                   </a-button>
                 </a-popconfirm>
@@ -43,18 +51,20 @@
             </template>
           </template>
         </a-table>
-
       </a-layout-content>
     </a-layout>
 
     <a-modal
-      title="电子书表单"
       v-model:visible="modalVisible"
+      title="电子书表单"
       :confirm-loading="modalLoading"
       @ok="handleModalOk"
     >
-      <a-form :model="category" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
-
+      <a-form
+        :model="category"
+        :label-col="{ span: 6 }"
+        :wrapper-col="{ span: 18 }"
+      >
         <a-form-item label="名称">
           <a-input v-model:value="category.name" />
         </a-form-item>
@@ -64,18 +74,24 @@
             v-model:value="category.parent"
             style="width: 120px"
           >
-
-            <a-select-option value="0">无</a-select-option>
-            <a-select-option v-for="c in level1"  :key="c.id" :value="c.id" :disabled="category.id === c.id" >{{c.name}}</a-select-option>
+            <a-select-option value="0">
+              无
+            </a-select-option>
+            <a-select-option
+              v-for="c in level1"
+              :key="c.id"
+              :value="c.id"
+              :disabled="category.id === c.id"
+            >
+              {{ c.name }}
+            </a-select-option>
           </a-select>
         </a-form-item>
         <a-form-item label="排序">
           <a-input v-model:value="category.sort" />
         </a-form-item>
-
       </a-form>
     </a-modal>
-
   </div>
 </template>
 
@@ -87,6 +103,8 @@ import { Tool } from "@/utils/tool";
 import { message } from 'ant-design-vue';
 
 const categorys = ref([]);//定义查询电子书返回集合
+const param = ref({}); // 定义 param 对象
+
 // 编辑相关功能
 const category = ref();
 const modalVisible = ref(false);
@@ -112,6 +130,13 @@ const columns = [
 
   }
 ];
+interface Category {
+  id: bigint;
+  name: string;
+  parent: bigint;
+  sort: number;
+}
+
 //编辑
 const edit = (record:any)=>{
   modalVisible.value =true;

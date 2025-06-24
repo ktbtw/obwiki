@@ -57,7 +57,13 @@ public class EbookServiceImpl extends ServiceImpl<EbookMapper, Ebook> implements
 
     @Override
     public void save(EbookSaveReq req) {
+        System.out.println("------------------");
+        System.out.println("<UNK>"+req);
+        System.out.println("------------------");
         Ebook ebook = CopyUtil.copy(req, Ebook.class);
+        System.out.println("------------------");
+        System.out.println("<UNK>"+ebook);
+        System.out.println("------------------");
         if (ObjectUtils.isEmpty(req.getId())) {
             // 雪花算法生成id
             long id = snowFlake.nextId();

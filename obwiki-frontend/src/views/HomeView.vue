@@ -11,7 +11,7 @@
           @click="handleClick"
         >
           <a-menu-item key="welcome">
-            <MailOutlined />
+            <!-- <MailOutlined /> -->
             <span>欢迎</span>
           </a-menu-item>
           <a-sub-menu
@@ -19,13 +19,13 @@
             :key="item.id"
           >
             <template #title>
-              <span><user-outlined />{{ item.name }}</span>
+              <span>{{ item.name }}</span>
             </template>
             <a-menu-item
               v-for="child in item.children"
               :key="child.id"
             >
-              <MailOutlined /><span>{{ child.name }}</span>
+              <span>{{ child.name }}</span>
             </a-menu-item>
           </a-sub-menu>
         </a-menu>
@@ -62,7 +62,9 @@
 
               <a-list-item-meta :description="item.description">
                 <template #title>
-                  <a :href="item.href">{{ item.name }}</a>
+                  <router-link :to="'/doc?ebookId='+item.id">
+                    {{ item.name }}
+                  </router-link>
                 </template>
                 <template #avatar>
                   <a-avatar :src="item.cover" />

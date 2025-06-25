@@ -1,7 +1,6 @@
 <template>
   <!-- 该页面进行海洋生物电子书管理 -->
   <div>
-    海洋生物电子书
     <a-layout>
       <a-layout-content
         :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }"
@@ -59,6 +58,11 @@
 
               <template v-if="column.dataIndex === 'action'">
                 <a-space size="small">
+                  <a-button type="primary">
+                    <router-link :to="'/admin/doc?ebookId='+record.id">
+                      文档管理
+                    </router-link>
+                  </a-button>
                   <a-button
                     type="primary"
                     @click="handleEdit(record)"
@@ -84,7 +88,7 @@
     </a-layout>
 
     <a-modal
-      v-model:visible="modalVisible"
+      v-model:open="modalVisible"
       title="电子书表单"
       :confirm-loading="modalLoading"
       @ok="handleModalOk"

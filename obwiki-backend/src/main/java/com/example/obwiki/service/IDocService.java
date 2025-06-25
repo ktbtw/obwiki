@@ -19,6 +19,8 @@ import java.util.List;
  */
 public interface IDocService extends IService<Doc> {
 
+    List<DocQueryResp> allbyEbookId(Long ebookId);
+
     PageResp<DocQueryResp> listByname(DocQueryReq req);
 
     void save(DocSaveReq req);
@@ -26,4 +28,6 @@ public interface IDocService extends IService<Doc> {
     void delete(Long id);
 
     List<DocQueryResp> all();
+
+    void delete(List<Long> ids);
 }

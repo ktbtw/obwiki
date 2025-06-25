@@ -55,7 +55,7 @@
     </a-layout>
 
     <a-modal
-      v-model:visible="modalVisible"
+      v-model:open="modalVisible"
       title="电子书表单"
       :confirm-loading="modalLoading"
       @ok="handleModalOk"

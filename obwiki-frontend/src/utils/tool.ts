@@ -2,12 +2,26 @@ export class Tool {
   /**
    * 空校验 null或""都返回true
    */
-  public static isEmpty (obj: any) {
-    if ((typeof obj === 'string')) {
-      return !obj || obj.replace(/\s+/g, "") === ""
-    } else {
-      return (!obj || JSON.stringify(obj) === "{}" || obj.length === 0);
+  public static isEmpty(obj: any): boolean {
+    if (typeof obj === 'string') {
+      return !obj || obj.trim() === '';
     }
+
+    if (obj == null) return true;
+
+    if (Array.isArray(obj)) {
+      return obj.length === 0;
+    }
+
+    if (typeof obj === 'object') {
+      try {
+        return Object.keys(obj).length === 0;
+      } catch {
+        return false; // 有些复杂对象不能安全访问
+      }
+    }
+
+    return false;
   }
 
   /**

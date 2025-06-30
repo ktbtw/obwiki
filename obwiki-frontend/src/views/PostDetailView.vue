@@ -46,12 +46,11 @@
                     v-model:value="newComment.content"
                     :rows="4"
                     placeholder="写下你的评论..."
-                    :maxLength="500"
-                    show-count
+                    :max-length="500"
                   />
                 </a-form-item>
                 <a-form-item>
-                  <a-button type="primary" @click="submitComment">
+                  <a-button type="primary" @click="submitComment(null)">
                     发表评论
                   </a-button>
                 </a-form-item>
@@ -69,38 +68,16 @@
 
           <a-divider />
 
-          <a-list
-            :data-source="comments"
-            :loading="loading"
-            item-layout="horizontal"
-          >
-            <template #renderItem="{ item, index }">
-              <a-list-item>
-                <a-comment
-                  :author="item.userId"
-                  :content="item.content"
-                  :datetime="new Date(item.createTime).toLocaleString()"
-                >
-                  <template #avatar>
-                    <a-avatar>{{ item.userId }}</a-avatar>
-                  </template>
-                  <template #actions>
-                    <a-space>
-                      <a-button type="link" size="small">
-                        <message-outlined /> 回复
-                      </a-button>
-                      <a-button type="link" size="small" @click="handleCommentVote(item.id, index)">
-                        <like-outlined /> {{ item.voteCount || 0 }} 点赞
-                      </a-button>
-                    </a-space>
-                  </template>
-                </a-comment>
-              </a-list-item>
-            </template>
-            <template #empty>
-              <a-empty description="暂无评论" />
-            </template>
-          </a-list>
+          <div v-if="comments.length > 0">
+            <comment-item
+              v-for="comment in comments"
+              :key="comment.id"
+              :comment="comment"
+              @submit-reply="submitComment"
+              @like-comment="handleCommentLike"
+            />
+          </div>
+          <a-empty v-else description="暂无评论"/>
         </a-card>
       </a-col>
     </a-row>
@@ -122,6 +99,7 @@ import { message } from 'ant-design-vue';
 import { marked } from 'marked';
 import { computed, defineComponent, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import CommentItem from './CommentItem.vue';
 
 export default defineComponent({
   name: 'PostDetailView',
@@ -129,7 +107,8 @@ export default defineComponent({
     EyeOutlined,
     LikeOutlined,
     MessageOutlined,
-    ClockCircleOutlined
+    ClockCircleOutlined,
+    CommentItem,
   },
   setup() {
     const route = useRoute();
@@ -142,8 +121,6 @@ export default defineComponent({
 
     const newComment = ref({
       content: '',
-      postId: Number(route.params.id),
-      userId: user.value?.id
     });
 
     const loadPost = async () => {
@@ -177,35 +154,66 @@ export default defineComponent({
       }
     };
 
-    const submitComment = async () => {
-      newComment.value.userId = user.value?.id;
-      newComment.value.postId = Number(route.params.id);
-
-      if (!newComment.value.content.trim()) {
-        message.warning('评论内容不能为空');
-        return;
+    const submitComment = async (replyData: { parentId: number; content: string } | null) => {
+      let params;
+      if (replyData) {
+        // 这是回复
+        params = {
+          content: replyData.content,
+          parentId: replyData.parentId,
+          postId: Number(route.params.id),
+          userId: user.value?.id,
+        };
+      } else {
+        // 这是主评论
+        if (!newComment.value.content.trim()) {
+          message.warning('评论内容不能为空');
+          return;
+        }
+        params = {
+          content: newComment.value.content,
+          parentId: undefined,
+          postId: Number(route.params.id),
+          userId: user.value?.id,
+        };
       }
 
       try {
-        await createComment(newComment.value);
+        await createComment(params);
         message.success('评论发表成功');
-        newComment.value.content = '';
-        await loadPost(); // 重新加载评论列表
+        newComment.value.content = ''; // 只清空主评论框
+        await loadPost(); // 重新加载整个评论树
       } catch (error) {
         message.error('评论发表失败，请稍后再试');
       }
     };
 
-    const handleCommentVote = async (commentId: number, index: number) => {
+    const findCommentInTree = (tree: any[], commentId: number): any | null => {
+      for (const node of tree) {
+        if (node.id === commentId) {
+          return node;
+        }
+        if (node.children) {
+          const found = findCommentInTree(node.children, commentId);
+          if (found) {
+            return found;
+          }
+        }
+      }
+      return null;
+    };
+
+    const handleCommentLike = async (commentId: number) => {
       if (!isLogin.value) {
         message.warning('请先登录后再点赞');
         return;
       }
-
       try {
         await voteComment(commentId, user.value.id);
-        // 点赞成功后本地加1
-        comments.value[index].voteCount = (comments.value[index].voteCount || 0) + 1;
+        const targetComment = findCommentInTree(comments.value, commentId);
+        if (targetComment) {
+          targetComment.voteCount = (targetComment.voteCount || 0) + 1;
+        }
         message.success('点赞成功');
       } catch (error) {
         message.error('点赞失败，请稍后再试');
@@ -223,7 +231,7 @@ export default defineComponent({
       marked,
       handleVote,
       submitComment,
-      handleCommentVote
+      handleCommentLike
     };
   }
 });

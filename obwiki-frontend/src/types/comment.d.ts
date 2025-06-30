@@ -12,4 +12,5 @@ export interface CommentSaveReq {
     content: string;
     userId: number;
     postId: number;
+    parentId?: number;
 } 

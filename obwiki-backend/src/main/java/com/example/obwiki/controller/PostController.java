@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.example.obwiki.dto.PostDetailDto;
 import com.example.obwiki.entity.Post;
 import com.example.obwiki.service.PostService;
 
@@ -28,7 +29,7 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public Post getPostById(@PathVariable Long id) {
+    public PostDetailDto getPostById(@PathVariable Long id) {
         return postService.getPostById(id);
     }
 

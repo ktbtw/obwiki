@@ -43,7 +43,7 @@
               <a-form :model="newComment" layout="vertical">
                 <a-form-item>
                   <a-textarea
-                    v-model="newComment.content"
+                    v-model:value="newComment.content"
                     :rows="4"
                     placeholder="写下你的评论..."
                     :maxLength="500"
@@ -178,6 +178,9 @@ export default defineComponent({
     };
 
     const submitComment = async () => {
+      newComment.value.userId = user.value?.id;
+      newComment.value.postId = Number(route.params.id);
+
       if (!newComment.value.content.trim()) {
         message.warning('评论内容不能为空');
         return;

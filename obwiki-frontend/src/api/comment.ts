@@ -14,7 +14,7 @@ export interface CommentQueryResp {
 
 // 创建评论
 export function createComment(data: CommentSaveReq) {
-    return api.post('/api/comment/save', data);
+    return api.post('/api/comment', data);
 }
 
 export function getCommentList(postId: number) {

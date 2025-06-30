@@ -1,11 +1,5 @@
+import { CommentSaveReq } from '@/types/comment';
 import api from './index';
-
-export interface CommentSaveReq {
-    postId: number;
-    userId: number;
-    content: string;
-    parentId?: number;
-}
 
 export interface CommentQueryResp {
     id: number;
@@ -18,14 +12,16 @@ export interface CommentQueryResp {
     updateTime: string;
 }
 
+// 创建评论
 export function createComment(data: CommentSaveReq) {
-    return api.post('/api/comment/save', data);
+    return api.post('/obwiki/comment/save', data);
 }
 
 export function getCommentList(postId: number) {
     return api.get(`/api/comment/list/${postId}`);
 }
 
+// 评论点赞
 export function voteComment(commentId: number, userId: number) {
-    return api.post(`/api/comment/${commentId}/vote?userId=${userId}`);
+    return api.post(`/obwiki/comment/vote/${commentId}`, { userId });
 } 

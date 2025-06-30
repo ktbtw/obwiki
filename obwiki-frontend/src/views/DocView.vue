@@ -47,10 +47,10 @@
   </a-layout>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
 import api from '@/api/index';
-import { message } from 'ant-design-vue';
 import { Tool } from "@/utils/tool";
+import { message } from 'ant-design-vue';
+import { onMounted, ref } from 'vue';
 import { useRoute } from "vue-router";
 
 
@@ -85,14 +85,12 @@ const handleQuery = () => {
       level1.value = Tool.array2Tree(docs.value, 0);
 
       console.log(Tool.isNotEmpty(level1))
-      // if (Tool.isNotEmpty(level1)) {
-      //   defaultSelectedKeys.value = [level1.value[0].id];
-      //   handleQueryContent(level1.value[0].id);
-
-
-      //   //初始线上文档信息
-      //   doc.value = level1.value[0];
-      // }
+      if (Tool.isNotEmpty(level1.value)) {
+        defaultSelectedKeys.value = [level1.value[0].id];
+        handleQueryContent(level1.value[0].id);
+        //初始化文档信息
+        doc.value = level1.value[0];
+      }
 
     } else {
       message.error(data.message);

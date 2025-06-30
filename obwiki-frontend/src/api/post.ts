@@ -1,3 +1,4 @@
+import { CommentQueryResp } from '@/types/comment';
 import api from './index';
 
 export interface PostSaveReq {
@@ -13,23 +14,28 @@ export interface PostQueryResp {
     userId: number;
     viewCount: number;
     voteCount: number;
+    isVoted: boolean;
     createTime: string;
     updateTime: string;
     comments: CommentQueryResp[];
 }
 
+// 创建文章
 export function createPost(data: PostSaveReq) {
-    return api.post('/api/post/save', data);
+    return api.post('/post/save', data);
 }
 
-export function getPostList() {
-    return api.get('/api/post/list');
+// 获取文章列表
+export function getPostList(params?: any) {
+    return api.get('/post/list', { params });
 }
 
-export function getPostDetail(id: string | number) {
-    return api.get(`/api/post/${id}`);
+// 获取文章详情
+export function getPostDetail(id: string) {
+    return api.get(`/post/${id}`);
 }
 
-export function votePost(id: number, userId: number) {
-    return api.post(`/api/post/${id}/vote?userId=${userId}`);
+// 文章点赞
+export function votePost(postId: number, userId: number) {
+    return api.post(`/post/vote/${postId}`, { userId });
 } 

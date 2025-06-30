@@ -14,13 +14,7 @@
               <a-tag :color="post.isVoted ? 'red' : 'default'" @click="handleVote">
                 <like-outlined /> {{ post.voteCount || 0 }} 点赞
               </a-tag>
-            </a-space>
-          </template>
-          <template #tags>
-            <a-tag color="cyan">社区讨论</a-tag>
-          </template>
-          <template #extra>
-            <a-space>
+              <a-divider type="vertical" />
               <a-avatar :size="32">{{ post.userId }}</a-avatar>
               <span class="author">{{ post.userId }}</span>
               <a-divider type="vertical" />
@@ -30,12 +24,15 @@
               </span>
             </a-space>
           </template>
+          <template #tags>
+            <a-tag color="cyan">社区讨论</a-tag>
+          </template>
         </a-page-header>
       </a-col>
 
       <a-col :span="24">
         <a-card :bordered="false">
-          <div class="post-content" v-html="marked(post.content || '')"></div>
+          <div class="post-content" v-html="marked.parse(post.content || '')"></div>
         </a-card>
       </a-col>
 
@@ -46,7 +43,7 @@
               <a-form :model="newComment" layout="vertical">
                 <a-form-item>
                   <a-textarea
-                    v-model:value="newComment.content"
+                    v-model="newComment.content"
                     :rows="4"
                     placeholder="写下你的评论..."
                     :maxLength="500"
@@ -145,7 +142,7 @@ export default defineComponent({
 
     const newComment = ref({
       content: '',
-      postId: route.params.id,
+      postId: Number(route.params.id),
       userId: user.value?.id
     });
 

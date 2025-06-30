@@ -74,7 +74,7 @@
             :loading="loading"
             item-layout="horizontal"
           >
-            <template #renderItem="{ item }">
+            <template #renderItem="{ item, index }">
               <a-list-item>
                 <a-comment
                   :author="item.userId"
@@ -89,7 +89,7 @@
                       <a-button type="link" size="small">
                         <message-outlined /> 回复
                       </a-button>
-                      <a-button type="link" size="small" @click="handleCommentVote(item.id)">
+                      <a-button type="link" size="small" @click="handleCommentVote(item.id, index)">
                         <like-outlined /> {{ item.voteCount || 0 }} 点赞
                       </a-button>
                     </a-space>
@@ -196,7 +196,7 @@ export default defineComponent({
       }
     };
 
-    const handleCommentVote = async (commentId: number) => {
+    const handleCommentVote = async (commentId: number, index: number) => {
       if (!isLogin.value) {
         message.warning('请先登录后再点赞');
         return;
@@ -204,8 +204,9 @@ export default defineComponent({
 
       try {
         await voteComment(commentId, user.value.id);
+        // 点赞成功后本地加1
+        comments.value[index].voteCount = (comments.value[index].voteCount || 0) + 1;
         message.success('点赞成功');
-        await loadPost(); // 重新加载评论列表
       } catch (error) {
         message.error('点赞失败，请稍后再试');
       }

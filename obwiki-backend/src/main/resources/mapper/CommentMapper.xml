@@ -7,6 +7,17 @@
     </insert>
 
     <select id="selectByPostId" parameterType="long" resultType="com.example.obwiki.entity.Comment">
-        SELECT * FROM comment WHERE post_id = #{postId} ORDER BY create_time ASC
+        SELECT id, post_id, user_id, content, create_time, vote_count AS voteCount, parent_id
+        FROM comment
+        WHERE post_id = #{postId}
+        ORDER BY create_time ASC
+    </select>
+
+    <update id="increaseVoteCount" parameterType="long">
+        UPDATE comment SET vote_count = COALESCE(vote_count, 0) + 1 WHERE id = #{id}
+    </update>
+
+    <select id="selectById" parameterType="long" resultType="com.example.obwiki.entity.Comment">
+        SELECT *, vote_count AS voteCount FROM comment WHERE id = #{id}
     </select>
 </mapper> 

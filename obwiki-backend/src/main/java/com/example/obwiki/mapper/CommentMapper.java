@@ -9,4 +9,6 @@ import com.example.obwiki.entity.Comment;
 public interface CommentMapper {
     int insert(Comment comment);
     List<Comment> selectByPostId(@Param("postId") Long postId);
+    void increaseVoteCount(@Param("id") Long id);
+    Comment selectById(@Param("id") Long id);
 } 

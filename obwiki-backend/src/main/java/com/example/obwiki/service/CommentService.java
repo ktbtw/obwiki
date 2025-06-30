@@ -18,4 +18,12 @@ public class CommentService {
     public List<Comment> getCommentsByPostId(Long postId) {
         return commentMapper.selectByPostId(postId);
     }
+
+    public void voteComment(Long id) {
+        commentMapper.increaseVoteCount(id);
+    }
+
+    public Comment getCommentById(Long id) {
+        return commentMapper.selectById(id);
+    }
 } 

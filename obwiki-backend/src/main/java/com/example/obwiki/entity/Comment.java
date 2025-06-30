@@ -8,6 +8,7 @@ public class Comment {
     private Long userId;
     private String content;
     private Date createTime;
+    private Integer voteCount;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -23,4 +24,7 @@ public class Comment {
 
     public Date getCreateTime() { return createTime; }
     public void setCreateTime(Date createTime) { this.createTime = createTime; }
+
+    public Integer getVoteCount() { return voteCount; }
+    public void setVoteCount(Integer voteCount) { this.voteCount = voteCount; }
 } 

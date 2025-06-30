@@ -46,6 +46,8 @@ public class CommentService {
                         parent.setChildren(new ArrayList<>());
                     }
                     parent.getChildren().add(comment);
+                    // 设置被回复人的用户名
+                    comment.setReplyToUsername(parent.getUsername());
                 }
             }
         }

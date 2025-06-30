@@ -7,10 +7,23 @@
     </insert>
 
     <select id="selectByPostId" parameterType="long" resultType="com.example.obwiki.entity.Comment">
-        SELECT id, post_id, user_id, content, create_time, vote_count AS voteCount, parent_id
-        FROM comment
-        WHERE post_id = #{postId}
-        ORDER BY create_time ASC
+        SELECT
+            c.id,
+            c.post_id,
+            c.user_id,
+            c.content,
+            c.create_time,
+            c.vote_count AS voteCount,
+            c.parent_id,
+            u.name AS username
+        FROM
+            comment c
+        LEFT JOIN
+            user u ON c.user_id = u.id
+        WHERE
+            c.post_id = #{postId}
+        ORDER BY
+            c.create_time ASC
     </select>
 
     <update id="increaseVoteCount" parameterType="long">

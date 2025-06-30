@@ -13,6 +13,9 @@ public class Comment {
     private Long parentId;
     private List<Comment> children;
 
+    private String username;
+    private String replyToUsername;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -36,4 +39,10 @@ public class Comment {
 
     public List<Comment> getChildren() { return children; }
     public void setChildren(List<Comment> children) { this.children = children; }
+
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+
+    public String getReplyToUsername() { return replyToUsername; }
+    public void setReplyToUsername(String replyToUsername) { this.replyToUsername = replyToUsername; }
 } 

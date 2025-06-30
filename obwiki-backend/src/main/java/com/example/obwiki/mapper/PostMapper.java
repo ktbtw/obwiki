@@ -10,4 +10,6 @@ public interface PostMapper {
     int insert(Post post);
     List<Post> selectAll();
     Post selectById(@Param("id") Long id);
+    void increaseVoteCount(@Param("id") Long id);
+    void increaseViewCount(@Param("id") Long id);
 } 

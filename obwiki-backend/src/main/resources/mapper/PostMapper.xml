@@ -13,4 +13,12 @@
     <select id="selectById" parameterType="long" resultType="com.example.obwiki.entity.Post">
         SELECT * FROM post WHERE id = #{id}
     </select>
+
+    <update id="increaseVoteCount">
+        UPDATE post SET vote_count = vote_count + 1 WHERE id = #{id}
+    </update>
+
+    <update id="increaseViewCount">
+        UPDATE post SET view_count = view_count + 1 WHERE id = #{id}
+    </update>
 </mapper> 

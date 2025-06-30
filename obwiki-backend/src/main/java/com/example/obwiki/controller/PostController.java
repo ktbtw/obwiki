@@ -17,7 +17,7 @@ public class PostController {
     @Autowired
     private PostService postService;
 
-    @PostMapping("")
+    @PostMapping("/save")
     public int addPost(@RequestBody Post post) {
         return postService.addPost(post);
     }
@@ -30,5 +30,10 @@ public class PostController {
     @GetMapping("/{id}")
     public Post getPostById(@PathVariable Long id) {
         return postService.getPostById(id);
+    }
+
+    @PostMapping("/vote/{id}")
+    public void votePost(@PathVariable Long id) {
+        postService.votePost(id);
     }
 } 

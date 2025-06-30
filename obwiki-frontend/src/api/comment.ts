@@ -14,7 +14,7 @@ export interface CommentQueryResp {
 
 // 创建评论
 export function createComment(data: CommentSaveReq) {
-    return api.post('/obwiki/comment/save', data);
+    return api.post('/api/comment/save', data);
 }
 
 export function getCommentList(postId: number) {
@@ -23,5 +23,5 @@ export function getCommentList(postId: number) {
 
 // 评论点赞
 export function voteComment(commentId: number, userId: number) {
-    return api.post(`/obwiki/comment/vote/${commentId}`, { userId });
+    return api.post(`/api/comment/vote/${commentId}`, { userId });
 } 

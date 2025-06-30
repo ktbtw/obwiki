@@ -20,6 +20,11 @@ public class PostService {
     }
 
     public Post getPostById(Long id) {
+        postMapper.increaseViewCount(id);
         return postMapper.selectById(id);
+    }
+
+    public void votePost(Long id) {
+        postMapper.increaseVoteCount(id);
     }
 } 

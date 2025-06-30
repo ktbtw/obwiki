@@ -7,6 +7,8 @@ public class Post {
     private Long userId;
     private String title;
     private String content;
+    private Integer viewCount;
+    private Integer voteCount;
     private Date createTime;
 
     public Long getId() { return id; }
@@ -20,6 +22,12 @@ public class Post {
 
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
+
+    public Integer getViewCount() { return viewCount; }
+    public void setViewCount(Integer viewCount) { this.viewCount = viewCount; }
+
+    public Integer getVoteCount() { return voteCount; }
+    public void setVoteCount(Integer voteCount) { this.voteCount = voteCount; }
 
     public Date getCreateTime() { return createTime; }
     public void setCreateTime(Date createTime) { this.createTime = createTime; }

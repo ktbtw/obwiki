@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.obwiki.mapper.PostMapper">
+    <insert id="insert" parameterType="com.example.obwiki.entity.Post">
+        INSERT INTO post(user_id, title, content, create_time)
+        VALUES (#{userId}, #{title}, #{content}, NOW())
+    </insert>
+
+    <select id="selectAll" resultType="com.example.obwiki.entity.Post">
+        SELECT * FROM post ORDER BY create_time DESC
+    </select>
+
+    <select id="selectById" parameterType="long" resultType="com.example.obwiki.entity.Post">
+        SELECT * FROM post WHERE id = #{id}
+    </select>
+</mapper> 

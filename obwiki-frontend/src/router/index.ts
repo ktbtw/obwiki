@@ -37,6 +37,17 @@ const routes: Array<RouteRecordRaw> = [
     path: '/admin/user',
     name: 'AdminUser',
     component: () => import('../views/admin/admin-user.vue')
+  },
+  {
+    path: '/post',
+    name: 'PostList',
+    component: () => import('../views/PostListView.vue')
+  },
+  {
+    path: '/post/:id',
+    name: 'PostDetail',
+    component: () => import('../views/PostDetailView.vue'),
+    props: true
   }
 ]
 

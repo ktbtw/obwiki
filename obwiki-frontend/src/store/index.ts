@@ -1,7 +1,6 @@
-import { createStore } from 'vuex'
+import SessionStorage from '@/utils/session-storage';
+import { createStore } from 'vuex';
 
-//声明对象
-declare let SessionStorage :any;
 const USER = 'USER';//声明key
  const store = createStore({
   state: {

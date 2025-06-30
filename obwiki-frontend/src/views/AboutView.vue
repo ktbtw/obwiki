@@ -1,11 +1,19 @@
 <template>
   <div class="about">
     <div class="about-container">
-      <h1 class="about-title">海洋生物知识库</h1>
+      <h1 class="about-title">
+        海洋生物知识库
+      </h1>
       <div class="about-content">
-        <p class="about-text">致力于构建一个集中的平台，让用户能够便捷地浏览、搜索和获取各类海洋生物知识。</p>
-        <p class="about-text">通过我们的平台，您可以随时随地获取您感兴趣的海洋生物内容。</p>
-        <p class="about-text">此外，平台还允许用户创建、编辑和组织内容，从而将大量的海洋生物知识集中记录、共享和更新。</p>
+        <p class="about-text">
+          致力于构建一个集中的平台，让用户能够便捷地浏览、搜索和获取各类海洋生物知识。
+        </p>
+        <p class="about-text">
+          通过我们的平台，您可以随时随地获取您感兴趣的海洋生物内容。
+        </p>
+        <p class="about-text">
+          此外，平台还允许用户创建、编辑和组织内容，从而将大量的海洋生物知识集中记录、共享和更新。
+        </p>
       </div>
     </div>
   </div>

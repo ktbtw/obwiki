@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.obwiki.dto.PostDetailDto;
 import com.example.obwiki.entity.Post;
@@ -30,8 +31,8 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public PostDetailDto getPostById(@PathVariable Long id) {
-        return postService.getPostById(id);
+    public PostDetailDto getPostById(@PathVariable Long id, @RequestParam Long userId) {
+        return postService.getPostById(id, userId);
     }
 
     @PostMapping("/vote/{id}")

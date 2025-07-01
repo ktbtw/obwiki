@@ -132,7 +132,7 @@ export default defineComponent({
     const loadPost = async () => {
       loading.value = true;
       try {
-        const res = await getPostDetail(route.params.id as string);
+        const res = await getPostDetail(route.params.id as string, user.value?.id);
         if (Tool.isNotEmpty(res.data)) {
           post.value = res.data;
           comments.value = res.data.comments || [];

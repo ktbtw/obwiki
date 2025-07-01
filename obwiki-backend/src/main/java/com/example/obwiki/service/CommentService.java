@@ -19,13 +19,17 @@ public class CommentService {
         return commentMapper.insert(comment);
     }
 
-    public List<Comment> getCommentsByPostId(Long postId) {
+    public List<Comment> getCommentsByPostId(Long postId, Long currentUserId) {
         // 1. 获取该帖子的所有评论（扁平列表）
         List<Comment> allComments = commentMapper.selectByPostId(postId);
         if (allComments.isEmpty()) {
             return new ArrayList<>();
         }
-
+        // 设置isVoted
+        for (Comment comment : allComments) {
+            boolean isVoted = commentMapper.existsVote(comment.getId(), currentUserId) > 0;
+            comment.setIsVoted(isVoted);
+        }
         // 2. 将列表转换为Map，方便快速查找
         Map<Long, Comment> commentMap = new HashMap<>();
         for (Comment comment : allComments) {

@@ -31,8 +31,8 @@ export function getPostList(params?: any) {
 }
 
 // 获取文章详情
-export function getPostDetail(id: string) {
-    return api.get(`/api/post/${id}`);
+export function getPostDetail(id: string, userId: string | number) {
+    return api.get(`/api/post/${id}`, { params: { userId } });
 }
 
 // 文章点赞

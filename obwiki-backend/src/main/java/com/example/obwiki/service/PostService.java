@@ -25,10 +25,10 @@ public class PostService {
         return postMapper.selectAll();
     }
 
-    public PostDetailDto getPostById(Long id) {
+    public PostDetailDto getPostById(Long id, Long userId) {
         postMapper.increaseViewCount(id);
         Post post = postMapper.selectById(id);
-        List<Comment> comments = commentService.getCommentsByPostId(id);
+        List<Comment> comments = commentService.getCommentsByPostId(id, userId);
 
         PostDetailDto postDetailDto = new PostDetailDto();
         BeanUtils.copyProperties(post, postDetailDto);

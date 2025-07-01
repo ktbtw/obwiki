@@ -16,6 +16,8 @@ public class Comment {
     private String username;
     private String replyToUsername;
 
+    private boolean isVoted;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -45,4 +47,7 @@ public class Comment {
 
     public String getReplyToUsername() { return replyToUsername; }
     public void setReplyToUsername(String replyToUsername) { this.replyToUsername = replyToUsername; }
+
+    public boolean getIsVoted() { return isVoted; }
+    public void setIsVoted(boolean isVoted) { this.isVoted = isVoted; }
 } 

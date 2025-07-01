@@ -25,8 +25,8 @@ public class CommentController {
     }
 
     @GetMapping("/list")
-    public List<Comment> getCommentsByPostId(@RequestParam Long postId) {
-        return commentService.getCommentsByPostId(postId);
+    public List<Comment> getCommentsByPostId(@RequestParam Long postId, @RequestParam Long userId) {
+        return commentService.getCommentsByPostId(postId, userId);
     }
 
     @PostMapping("/vote/{id}")

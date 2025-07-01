@@ -87,4 +87,10 @@ public class PostService {
         }
         wsServiceAsync.sendInfo("帖子有新动态");
     }
+
+    public void deletePost(Long id) {
+        System.out.println("删除帖子，id=" + id);
+        postMapper.deleteById(id);
+        wsServiceAsync.sendInfo("帖子有新动态");
+    }
 } 

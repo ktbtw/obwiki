@@ -51,4 +51,8 @@
         INSERT INTO post_view_log (post_id, user_id, ip, view_time)
         VALUES (#{postId}, #{userId}, #{ip}, NOW())
     </insert>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM post WHERE id = #{id}
+    </delete>
 </mapper> 

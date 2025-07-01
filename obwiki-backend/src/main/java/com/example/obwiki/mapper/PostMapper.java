@@ -19,4 +19,5 @@ public interface PostMapper {
     int countViewLogByUser(@Param("postId") Long postId, @Param("userId") Long userId);
     int countViewLogByIp(@Param("postId") Long postId, @Param("ip") String ip);
     int insertViewLog(@Param("postId") Long postId, @Param("userId") Long userId, @Param("ip") String ip);
+    int deleteById(@Param("id") Long id);
 } 

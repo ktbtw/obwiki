@@ -43,7 +43,7 @@
       </a-col>
 
       <a-col :span="24">
-        <a-card :bordered="false" title="评论区">
+        <a-card :bordered="false" title="评论区" id="comment-section">
           <template v-if="isLogin">
             <div class="comment-editor">
               <a-form :model="newComment" layout="vertical">
@@ -103,7 +103,7 @@ MessageOutlined
 } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
 import { marked } from 'marked';
-import { computed, defineComponent, onMounted, ref } from 'vue';
+import { computed, defineComponent, nextTick, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import CommentItem from './CommentItem.vue';
 
@@ -237,7 +237,16 @@ export default defineComponent({
       }
     };
 
-    onMounted(loadPost);
+    onMounted(() => {
+      loadPost();
+      // 自动滚动到评论区
+      if (route.query.scrollTo === 'comment') {
+        nextTick(() => {
+          const el = document.getElementById('comment-section');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        });
+      }
+    });
 
     return {
       post,

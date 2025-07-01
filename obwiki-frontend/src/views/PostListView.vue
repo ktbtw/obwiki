@@ -73,7 +73,7 @@
 
                 <template #actions>
                   <a-space>
-                    <a-button type="link">
+                    <a-button type="link" @click="goToComment(item.id)">
                       <message-outlined /> 评论
                     </a-button>
                     <a-button type="link">
@@ -138,6 +138,7 @@ ShareAltOutlined
 } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
 import { computed, defineComponent, onMounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
   name: 'PostListView',
@@ -155,6 +156,7 @@ export default defineComponent({
     const user = computed(() => store.state.user);
     const isLogin = computed(() => !!user.value?.token);
     const currentFilter = ref('latest');
+    const router = useRouter();
 
     // Modal related state
     const modalVisible = ref(false);
@@ -222,6 +224,10 @@ export default defineComponent({
       }
     };
 
+    const goToComment = (postId: number) => {
+      router.push({ path: `/post/${postId}`, query: { scrollTo: 'comment' } });
+    };
+
     onMounted(loadPosts);
 
     return {
@@ -235,6 +241,7 @@ export default defineComponent({
       loadPosts,
       showModal,
       handleOk,
+      goToComment,
     };
   }
 });

@@ -104,7 +104,7 @@ MessageOutlined
 } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
 import { marked } from 'marked';
-import { computed, defineComponent, nextTick, onMounted, ref } from 'vue';
+import { computed, defineComponent, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import CommentItem from './CommentItem.vue';
 
@@ -130,16 +130,44 @@ export default defineComponent({
       content: '',
     });
 
+    let websocket: any = null;
+    let wsToken: string = '';
+
+    // WebSocket实时刷新
+    const initWebSocket = () => {
+      if ('WebSocket' in window) {
+        wsToken = Tool.uuid(10);
+        websocket = new WebSocket(process.env.VUE_APP_WS_SERVER + '/ws/' + wsToken);
+        websocket.onopen = () => {
+          console.log('WebSocket连接成功', websocket);
+        };
+        websocket.onmessage = (event: any) => {
+          console.log('WebSocket收到消息:', event.data);
+          // 收到消息自动刷新详情和评论
+          loadPost();
+        };
+        websocket.onerror = (e: any) => {
+          console.log('WebSocket连接错误', e);
+        };
+        websocket.onclose = (e: any) => {
+          console.log('WebSocket连接关闭', e);
+        };
+      }
+    };
+
     const loadPost = async () => {
       loading.value = true;
+      console.log('调用loadPost，准备请求文章详情和评论');
       try {
         const res = await getPostDetail(route.params.id as string, user.value?.id);
         if (Tool.isNotEmpty(res.data)) {
           post.value = res.data;
           comments.value = res.data.comments || [];
+          console.log('loadPost获取到数据:', res.data);
         }
       } catch (error) {
         message.error('加载文章详情失败');
+        console.log('loadPost请求失败', error);
       } finally {
         loading.value = false;
       }
@@ -248,12 +276,20 @@ export default defineComponent({
 
     onMounted(() => {
       loadPost();
+      initWebSocket();
       // 自动滚动到评论区
       if (route.query.scrollTo === 'comment') {
         nextTick(() => {
           const el = document.getElementById('comment-section');
           if (el) el.scrollIntoView({ behavior: 'smooth' });
         });
+      }
+    });
+
+    // 组件卸载时关闭WebSocket
+    onUnmounted(() => {
+      if (websocket) {
+        websocket.close();
       }
     });
 

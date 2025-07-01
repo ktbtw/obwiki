@@ -8,15 +8,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.obwiki.entity.Comment;
 import com.example.obwiki.mapper.CommentMapper;
+import com.example.obwiki.websocket.WsServiceAsync;
 
 @Service
 public class CommentService {
     @Autowired
     private CommentMapper commentMapper;
 
+    @Autowired
+    private WsServiceAsync wsServiceAsync;
+
     public int addComment(Comment comment) {
         System.out.println("插入评论参数：" + comment);
-        return commentMapper.insert(comment);
+        int result = commentMapper.insert(comment);
+        wsServiceAsync.sendInfo("帖子有新动态");
+        return result;
     }
 
     public List<Comment> getCommentsByPostId(Long postId, Long currentUserId) {
@@ -77,6 +83,7 @@ public class CommentService {
                 commentMapper.increaseVoteCount(commentId);
             }
         }
+        wsServiceAsync.sendInfo("帖子有新动态");
     }
 
     public Comment getCommentById(Long id) {

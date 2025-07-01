@@ -10,6 +10,7 @@ import com.example.obwiki.entity.Post;
 import com.example.obwiki.entity.User;
 import com.example.obwiki.mapper.PostMapper;
 import com.example.obwiki.mapper.UserMapper;
+import com.example.obwiki.websocket.WsServiceAsync;
 
 @Service
 public class PostService {
@@ -22,8 +23,13 @@ public class PostService {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private WsServiceAsync wsServiceAsync;
+
     public int addPost(Post post) {
-        return postMapper.insert(post);
+        int result = postMapper.insert(post);
+        wsServiceAsync.sendInfo("帖子有新动态");
+        return result;
     }
 
     public List<Post> getAllPosts() {
@@ -79,5 +85,6 @@ public class PostService {
                 postMapper.increaseVoteCount(postId);
             }
         }
+        wsServiceAsync.sendInfo("帖子有新动态");
     }
 } 

@@ -6,7 +6,7 @@
           <div class="left">
             <h2 class="page-title">社区讨论</h2>
             <div class="filters">
-              <a-radio-group v-model:value="currentFilter" button-style="solid">
+              <a-radio-group v-model="currentFilter" button-style="solid">
                 <a-radio-button value="latest">最新发布</a-radio-button>
                 <a-radio-button value="hot">最热门</a-radio-button>
                 <a-radio-button value="most-viewed">最多浏览</a-radio-button>
@@ -99,7 +99,7 @@
           :rules="[{ required: true, message: '请输入标题' }]"
         >
           <a-input 
-            v-model:value="newPost.title" 
+            v-model="newPost.title" 
             placeholder="请输入标题"
             :maxLength="100"
             show-count
@@ -111,7 +111,7 @@
           :rules="[{ required: true, message: '请输入内容' }]"
         >
           <a-textarea 
-            v-model:value="newPost.content" 
+            v-model="newPost.content" 
             :rows="8"
             placeholder="请输入内容"
             :maxLength="2000"
@@ -136,7 +136,7 @@ MessageOutlined,
 ShareAltOutlined
 } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
-import { computed, defineComponent, onMounted, ref, watch } from 'vue';
+import { computed, defineComponent, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 export default defineComponent({
@@ -235,7 +235,36 @@ export default defineComponent({
       router.push({ path: `/post/${postId}`, query: { scrollTo: 'comment' } });
     };
 
-    onMounted(loadPosts);
+    let websocket: any = null;
+    let wsToken: string = '';
+
+    // WebSocket实时刷新
+    const initWebSocket = () => {
+      if ('WebSocket' in window) {
+        wsToken = Math.random().toString(36).slice(2, 12);
+        websocket = new WebSocket(process.env.VUE_APP_WS_SERVER + '/ws/' + wsToken);
+        websocket.onopen = () => {
+          console.log('WebSocket连接成功');
+        };
+        websocket.onmessage = () => {
+          loadPosts();
+        };
+        websocket.onerror = () => {
+          console.log('WebSocket连接错误');
+        };
+        websocket.onclose = () => {
+          console.log('WebSocket连接关闭');
+        };
+      }
+    };
+
+    onMounted(() => {
+      loadPosts();
+      initWebSocket();
+    });
+    onUnmounted(() => {
+      if (websocket) websocket.close();
+    });
 
     return {
       posts,

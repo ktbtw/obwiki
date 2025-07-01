@@ -130,9 +130,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
 import api from '@/api/index';
 import * as echarts from 'echarts';
+import { onMounted, onUnmounted, ref } from 'vue';
 
 const testEcharts = () => {
     const myChart = echarts.init(document.getElementById("main"));
@@ -156,11 +156,38 @@ const testEcharts = () => {
     myChart.setOption(option);
 }
 
-onMounted(() => {
-    getStatistic();
-    testEcharts();
-});
+let websocket: any = null;
+let wsToken: string = '';
 
+// WebSocket实时刷新
+const initWebSocket = () => {
+  if ('WebSocket' in window) {
+    wsToken = Math.random().toString(36).slice(2, 12);
+    websocket = new WebSocket(process.env.VUE_APP_WS_SERVER + '/ws/' + wsToken);
+    websocket.onopen = () => {
+      console.log('WebSocket连接成功');
+    };
+    websocket.onmessage = () => {
+      getStatistic();
+      get30DayStatistic && get30DayStatistic();
+    };
+    websocket.onerror = () => {
+      console.log('WebSocket连接错误');
+    };
+    websocket.onclose = () => {
+      console.log('WebSocket连接关闭');
+    };
+  }
+};
+
+onMounted(() => {
+  getStatistic();
+  testEcharts();
+  initWebSocket();
+});
+onUnmounted(() => {
+  if (websocket) websocket.close();
+});
 
 const statistic = ref();
 statistic.value = {};
@@ -196,12 +223,6 @@ const getStatistic = () => {
         }
     });
 };
-
-
-
-onMounted(() => {
-    getStatistic();
-});
 
 const init30DayEcharts = (list: any) => {
     // 发布生产后出现问题：切到别的页面，再切回首页，报表显示不出来
@@ -283,13 +304,6 @@ const get30DayStatistic = () => {
         }
     });
 };
-
-
-onMounted(() => {
-    getStatistic();
-    //get30DayStatistic();      //把这个注释去掉就可以显示30天前的数据  虽然没有任何数据
-});
-
 
 </script>
 <style scoped></style>

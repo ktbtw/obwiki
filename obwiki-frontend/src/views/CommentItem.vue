@@ -39,7 +39,7 @@
            <template #author>
              <span>
                <b>{{ reply.username }}</b>
-               <span v-if="reply.replyToUsername"> -> <b>{{ reply.replyToUsername }}</b></span>
+               <span v-if="reply.parentId && reply.parentId !== comment.id && reply.replyToUsername"> -> <b>{{ reply.replyToUsername }}</b></span>
              </span>
            </template>
            <template #avatar>
@@ -111,6 +111,8 @@ export default defineComponent({
     const flatten = (comments: any[]): any[] => {
       let result: any[] = [];
       for (const comment of comments) {
+        // 日志：打印每个子评论
+        console.log('flatten处理:', {id: comment.id, parentId: comment.parentId, replyToUsername: comment.replyToUsername});
         result.push(comment);
         if (comment.children && comment.children.length > 0) {
           result = result.concat(flatten(comment.children));
@@ -121,7 +123,10 @@ export default defineComponent({
 
     const flattenedReplies = computed(() => {
       if (props.comment.children && props.comment.children.length > 0) {
-        return flatten(props.comment.children);
+        const flat = flatten(props.comment.children);
+        // 日志：打印所有子评论
+        console.log('flattenedReplies:', flat.map(r => ({id: r.id, parentId: r.parentId, replyToUsername: r.replyToUsername})));
+        return flat;
       }
       return [];
     });

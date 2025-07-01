@@ -99,7 +99,7 @@
           :rules="[{ required: true, message: '请输入标题' }]"
         >
           <a-input 
-            v-model="newPost.title" 
+            v-model:value="newPost.title" 
             placeholder="请输入标题"
             :maxLength="100"
             show-count
@@ -111,7 +111,7 @@
           :rules="[{ required: true, message: '请输入内容' }]"
         >
           <a-textarea 
-            v-model="newPost.content" 
+            v-model:value="newPost.content" 
             :rows="8"
             placeholder="请输入内容"
             :maxLength="2000"
@@ -209,10 +209,12 @@ export default defineComponent({
         content: '',
         userId: user.value?.id,
       };
+      console.log('打开发帖弹窗，newPost:', newPost.value);
       modalVisible.value = true;
     };
 
     const handleOk = async () => {
+      console.log('点击发布，newPost:', newPost.value);
       if (!newPost.value.title.trim() || !newPost.value.content.trim()) {
         message.warning('标题和内容不能为空！');
         return;

@@ -83,7 +83,7 @@
                       danger
                       @click="handleDeletePost(item.id)"
                     >
-                      删除
+                      <DeleteOutlined /> 删除
                     </a-button>
                     <span style="display:none">
                       {{ console.log('删除按钮条件:', isLogin, user.value, item.userId, user.value && item.userId === user.value.id, typeof item.userId, typeof (user.value && user.value.id)) }}
@@ -141,13 +141,14 @@ import store from '@/store';
 import SessionStorage from '@/utils/session-storage';
 import {
 ClockCircleOutlined,
+DeleteOutlined,
 EyeOutlined,
 FormOutlined,
 LikeOutlined,
 MessageOutlined,
 ShareAltOutlined
 } from '@ant-design/icons-vue';
-import { message } from 'ant-design-vue';
+import { message, Modal } from 'ant-design-vue';
 import { computed, defineComponent, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -159,7 +160,8 @@ export default defineComponent({
     FormOutlined,
     MessageOutlined,
     ShareAltOutlined,
-    ClockCircleOutlined
+    ClockCircleOutlined,
+    DeleteOutlined
   },
   setup() {
     const posts = ref<any[]>([]);
@@ -250,14 +252,22 @@ export default defineComponent({
     };
 
     const handleDeletePost = async (postId: number) => {
-      if (!window.confirm('确定要删除这篇文章吗？删除后不可恢复！')) return;
-      try {
-        await deletePost(postId);
-        message.success('删除成功');
-        await loadPosts();
-      } catch (error) {
-        message.error('删除失败，请稍后再试');
-      }
+      Modal.confirm({
+        title: '确认删除',
+        content: '确定要删除这篇文章吗？删除后不可恢复！',
+        okText: '删除',
+        okType: 'danger',
+        cancelText: '取消',
+        onOk: async () => {
+          try {
+            await deletePost(postId);
+            message.success('删除成功');
+            await loadPosts();
+          } catch (error) {
+            message.error('删除失败，请稍后再试');
+          }
+        },
+      });
     };
 
     let websocket: any = null;
@@ -394,5 +404,15 @@ export default defineComponent({
 
 :deep(.ant-avatar) {
   background-color: #1890ff;
+}
+</style>
+
+<style>
+/* 强制Ant Design Vue的Modal弹窗垂直居中 */
+.ant-modal-root .ant-modal-wrap {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 100vh;
 }
 </style> 

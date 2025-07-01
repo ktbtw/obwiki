@@ -20,7 +20,6 @@
                 {{ post.voteCount || 0 }} {{ post.isVoted ? '已点赞' : '点赞' }}
               </a-tag>
               <a-divider type="vertical" />
-              <span style="display:none">{{ console.log('post对象:', post, 'user:', user.value) }}</span>
               <a-avatar :size="32" :src="getImageUrl(post.avatar)" icon="user" />
               <span class="author">{{ post.username }}</span>
               <a-divider type="vertical" />
@@ -28,15 +27,6 @@
                 <clock-circle-outlined />
                 {{ new Date(post.createTime).toLocaleString() }}
               </span>
-              <a-button
-                v-if="isLogin && user.value && post.userId === user.value.id"
-                danger
-                @click="handleDeletePost"
-                style="margin-left: 8px;"
-              >
-                删除
-              </a-button>
-              <span style="display:none">{{ console.log('删除按钮条件:', isLogin, user.value, post.userId, user.value && post.userId === user.value.id) }}</span>
             </a-space>
           </template>
           <template #tags>
@@ -104,9 +94,11 @@ import { createComment, voteComment } from '@/api/comment';
 import api from '@/api/index';
 import { deletePost, getPostDetail, votePost } from '@/api/post';
 import store from '@/store';
+import SessionStorage from '@/utils/session-storage';
 import { Tool } from '@/utils/tool';
 import {
 ClockCircleOutlined,
+DeleteOutlined,
 EyeOutlined,
 LikeOutlined,
 MessageOutlined
@@ -125,6 +117,7 @@ export default defineComponent({
     MessageOutlined,
     ClockCircleOutlined,
     CommentItem,
+    DeleteOutlined
   },
   setup() {
     const route = useRoute();
@@ -141,6 +134,10 @@ export default defineComponent({
 
     let websocket: any = null;
     let wsToken: string = '';
+
+    const USER = 'USER';
+    const sessionUser = SessionStorage.get(USER) || {};
+    const currentUserId = sessionUser.id;
 
     // WebSocket实时刷新
     const initWebSocket = () => {
@@ -326,7 +323,8 @@ export default defineComponent({
       handleCommentLike,
       getImageUrl,
       handleDeletePost,
-      user
+      user,
+      currentUserId
     };
   }
 });

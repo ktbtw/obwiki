@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 import com.example.obwiki.dto.PostDetailDto;
 import com.example.obwiki.entity.Comment;
 import com.example.obwiki.entity.Post;
+import com.example.obwiki.entity.User;
 import com.example.obwiki.mapper.PostMapper;
+import com.example.obwiki.mapper.UserMapper;
 
 @Service
 public class PostService {
@@ -17,12 +19,24 @@ public class PostService {
     @Autowired
     private CommentService commentService;
 
+    @Autowired
+    private UserMapper userMapper;
+
     public int addPost(Post post) {
         return postMapper.insert(post);
     }
 
     public List<Post> getAllPosts() {
-        return postMapper.selectAll();
+        List<Post> posts = postMapper.selectAll();
+        for (Post post : posts) {
+            if (post.getUserId() != null) {
+                User user = userMapper.selectById(post.getUserId());
+                if (user != null) {
+                    post.setAvatar(user.getAvatar());
+                }
+            }
+        }
+        return posts;
     }
 
     public PostDetailDto getPostById(Long id, Long userId, String ip) {
@@ -44,7 +58,13 @@ public class PostService {
         PostDetailDto postDetailDto = new PostDetailDto();
         BeanUtils.copyProperties(post, postDetailDto);
         postDetailDto.setComments(comments);
-
+        // 补全avatar
+        if (post.getUserId() != null) {
+            User user = userMapper.selectById(post.getUserId());
+            if (user != null) {
+                postDetailDto.setAvatar(user.getAvatar());
+            }
+        }
         return postDetailDto;
     }
 

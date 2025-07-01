@@ -6,6 +6,7 @@ import com.example.obwiki.entity.Post;
 
 public class PostDetailDto extends Post {
     private List<Comment> comments;
+    private String avatar;
 
     public List<Comment> getComments() {
         return comments;
@@ -13,5 +14,13 @@ public class PostDetailDto extends Post {
 
     public void setComments(List<Comment> comments) {
         this.comments = comments;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 } 

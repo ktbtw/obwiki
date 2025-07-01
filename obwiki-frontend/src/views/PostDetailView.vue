@@ -21,7 +21,7 @@
               </a-tag>
               <a-divider type="vertical" />
               <span style="display:none">{{ console.log('post对象:', post) }}</span>
-              <a-avatar :size="32">{{ post.username }}</a-avatar>
+              <a-avatar :size="32" :src="getImageUrl(post.avatar)" icon="user" />
               <span class="author">{{ post.username }}</span>
               <a-divider type="vertical" />
               <span class="time">
@@ -92,6 +92,7 @@
 
 <script lang="ts">
 import { createComment, voteComment } from '@/api/comment';
+import api from '@/api/index';
 import { getPostDetail, votePost } from '@/api/post';
 import store from '@/store';
 import { Tool } from '@/utils/tool';
@@ -237,6 +238,14 @@ export default defineComponent({
       }
     };
 
+    // 封装图片URL生成方法
+    const baseURL = api.defaults.baseURL?.replace(/\/$/, '') || '';
+    function getImageUrl(path: string) {
+      if (!path) return '';
+      if (/^https?:\/\//.test(path)) return path;
+      return baseURL + path;
+    }
+
     onMounted(() => {
       loadPost();
       // 自动滚动到评论区
@@ -257,7 +266,8 @@ export default defineComponent({
       marked,
       handleVote,
       submitComment,
-      handleCommentLike
+      handleCommentLike,
+      getImageUrl
     };
   }
 });

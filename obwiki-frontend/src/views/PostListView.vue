@@ -53,9 +53,7 @@
                     </router-link>
                   </template>
                   <template #avatar>
-                    <a-avatar :size="48">
-                      {{ item.userId }}
-                    </a-avatar>
+                    <a-avatar :size="48" :src="getImageUrl(item.avatar)" icon="user" />
                   </template>
                   <template #description>
                     <a-space>
@@ -126,6 +124,7 @@
 </template>
 
 <script lang="ts">
+import api from '@/api/index';
 import { createPost, getPostList } from '@/api/post';
 import store from '@/store';
 import {
@@ -166,6 +165,14 @@ export default defineComponent({
       content: '',
       userId: user.value?.id,
     });
+
+    // 封装图片URL生成方法
+    const baseURL = api.defaults.baseURL?.replace(/\/$/, '') || '';
+    function getImageUrl(path: string) {
+      if (!path) return '';
+      if (/^https?:\/\//.test(path)) return path;
+      return baseURL + path;
+    }
 
     const loadPosts = async () => {
       loading.value = true;
@@ -242,6 +249,7 @@ export default defineComponent({
       showModal,
       handleOk,
       goToComment,
+      getImageUrl
     };
   }
 });

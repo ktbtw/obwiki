@@ -11,7 +11,7 @@
     </template>
     <template #author><a>{{ comment.username || comment.userId }}</a></template>
     <template #avatar>
-      <a-avatar :src="`https://i.pravatar.cc/150?u=${comment.userId}`" :alt="comment.username"/>
+      <a-avatar :src="getImageUrl(comment.avatar) || `https://i.pravatar.cc/150?u=${comment.userId}`" :alt="comment.username" />
     </template>
     <template #content>
       <p>{{ comment.content }}</p>
@@ -45,7 +45,7 @@
              </span>
            </template>
            <template #avatar>
-             <a-avatar :src="`https://i.pravatar.cc/150?u=${reply.userId}`" :alt="reply.username"/>
+             <a-avatar :src="getImageUrl(reply.avatar) || `https://i.pravatar.cc/150?u=${reply.userId}`" :alt="reply.username" />
            </template>
            <template #content>
               <p>{{ reply.content }}</p>
@@ -64,6 +64,7 @@
 </template>
 
 <script lang="ts">
+import api from '@/api/index';
 import { LikeOutlined, MessageOutlined } from '@ant-design/icons-vue';
 import { computed, defineComponent, ref } from 'vue';
 
@@ -84,6 +85,13 @@ export default defineComponent({
     const activeReplyId = ref<number | null>(null);
     const replyContent = ref('');
     const replying = ref(false);
+
+    const baseURL = api.defaults.baseURL?.replace(/\/$/, '') || '';
+    function getImageUrl(path: string) {
+      if (!path) return '';
+      if (/^https?:\/\//.test(path)) return path;
+      return baseURL + path;
+    }
 
     const toggleReplyFor = (id: number) => {
       if (activeReplyId.value === id) {
@@ -146,6 +154,7 @@ export default defineComponent({
       handleReply,
       flattenedReplies,
       handleLike,
+      getImageUrl,
     };
   },
 });

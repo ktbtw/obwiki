@@ -39,9 +39,11 @@
              </a-button>
            </template>
            <template #author>
-             <span>
+             <span style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;">
                <b>{{ reply.username }}</b>
-               <span v-if="reply.parentId && reply.parentId !== comment.id && reply.replyToUsername"> -> <b>{{ reply.replyToUsername }}</b></span>
+               <span v-if="reply.parentId && reply.parentId !== comment.id && reply.replyToUsername" style="display:inline-flex;align-items:center;gap:4px;">
+                 <span style="font-size:16px;color:#bbb;">&#9654;</span> <b>{{ reply.replyToUsername }}</b>
+               </span>
              </span>
            </template>
            <template #avatar>

@@ -25,8 +25,19 @@ public class PostService {
         return postMapper.selectAll();
     }
 
-    public PostDetailDto getPostById(Long id, Long userId) {
-        postMapper.increaseViewCount(id);
+    public PostDetailDto getPostById(Long id, Long userId, String ip) {
+        // 唯一用户唯一计数浏览量
+        if (userId != null && userId != 0) {
+            if (postMapper.countViewLogByUser(id, userId) == 0) {
+                postMapper.insertViewLog(id, userId, null);
+                postMapper.increaseViewCount(id);
+            }
+        } else if (ip != null && !ip.isEmpty()) {
+            if (postMapper.countViewLogByIp(id, ip) == 0) {
+                postMapper.insertViewLog(id, null, ip);
+                postMapper.increaseViewCount(id);
+            }
+        }
         Post post = postMapper.selectById(id);
         List<Comment> comments = commentService.getCommentsByPostId(id, userId);
 

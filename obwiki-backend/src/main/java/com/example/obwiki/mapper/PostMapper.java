@@ -16,4 +16,7 @@ public interface PostMapper {
     int deleteVote(@Param("postId") Long postId, @Param("userId") Long userId);
     int existsVote(@Param("postId") Long postId, @Param("userId") Long userId);
     int decreaseVoteCount(@Param("id") Long id);
+    int countViewLogByUser(@Param("postId") Long postId, @Param("userId") Long userId);
+    int countViewLogByIp(@Param("postId") Long postId, @Param("ip") String ip);
+    int insertViewLog(@Param("postId") Long postId, @Param("userId") Long userId, @Param("ip") String ip);
 } 

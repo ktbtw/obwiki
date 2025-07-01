@@ -40,4 +40,15 @@
     <update id="decreaseVoteCount">
         UPDATE post SET vote_count = vote_count - 1 WHERE id = #{id} AND vote_count > 0
     </update>
+
+    <select id="countViewLogByUser" parameterType="map" resultType="int">
+        SELECT COUNT(*) FROM post_view_log WHERE post_id = #{postId} AND user_id = #{userId}
+    </select>
+    <select id="countViewLogByIp" parameterType="map" resultType="int">
+        SELECT COUNT(*) FROM post_view_log WHERE post_id = #{postId} AND ip = #{ip}
+    </select>
+    <insert id="insertViewLog" parameterType="map">
+        INSERT INTO post_view_log (post_id, user_id, ip, view_time)
+        VALUES (#{postId}, #{userId}, #{ip}, NOW())
+    </insert>
 </mapper> 

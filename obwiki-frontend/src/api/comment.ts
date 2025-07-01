@@ -22,6 +22,6 @@ export function getCommentList(postId: number) {
 }
 
 // 评论点赞
-export function voteComment(commentId: number, userId: number) {
-    return api.post(`/api/comment/vote/${commentId}`, { userId });
+export function voteComment(commentId: number, userId: number, cancel: boolean) {
+    return api.post(`/api/comment/vote/${commentId}`, { userId, cancel });
 } 

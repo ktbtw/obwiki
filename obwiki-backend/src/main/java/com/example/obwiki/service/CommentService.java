@@ -63,8 +63,16 @@ public class CommentService {
         return rootComments;
     }
 
-    public void voteComment(Long id) {
-        commentMapper.increaseVoteCount(id);
+    public void voteComment(Long commentId, Long userId, boolean cancel) {
+        if (cancel) {
+            commentMapper.decreaseVoteCount(commentId);
+            commentMapper.deleteVote(commentId, userId);
+        } else {
+            if (commentMapper.existsVote(commentId, userId) == 0) {
+                commentMapper.insertVote(commentId, userId);
+                commentMapper.increaseVoteCount(commentId);
+            }
+        }
     }
 
     public Comment getCommentById(Long id) {

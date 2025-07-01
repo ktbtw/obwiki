@@ -11,4 +11,8 @@ public interface CommentMapper {
     List<Comment> selectByPostId(@Param("postId") Long postId);
     void increaseVoteCount(@Param("id") Long id);
     Comment selectById(@Param("id") Long id);
+    int insertVote(@Param("commentId") Long commentId, @Param("userId") Long userId);
+    int deleteVote(@Param("commentId") Long commentId, @Param("userId") Long userId);
+    int existsVote(@Param("commentId") Long commentId, @Param("userId") Long userId);
+    int decreaseVoteCount(@Param("id") Long id);
 } 

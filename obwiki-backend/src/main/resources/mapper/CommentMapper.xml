@@ -44,4 +44,17 @@
     <select id="selectById" parameterType="long" resultType="com.example.obwiki.entity.Comment">
         SELECT *, vote_count AS voteCount FROM comment WHERE id = #{id}
     </select>
+
+    <insert id="insertVote" parameterType="map">
+        INSERT INTO comment_vote(comment_id, user_id) VALUES (#{commentId}, #{userId})
+    </insert>
+    <delete id="deleteVote" parameterType="map">
+        DELETE FROM comment_vote WHERE comment_id = #{commentId} AND user_id = #{userId}
+    </delete>
+    <select id="existsVote" parameterType="map" resultType="int">
+        SELECT COUNT(*) FROM comment_vote WHERE comment_id = #{commentId} AND user_id = #{userId}
+    </select>
+    <update id="decreaseVoteCount" parameterType="long">
+        UPDATE comment SET vote_count = GREATEST(COALESCE(vote_count, 1) - 1, 0) WHERE id = #{id}
+    </update>
 </mapper> 

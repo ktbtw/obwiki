@@ -215,20 +215,25 @@ export default defineComponent({
       return null;
     };
 
-    const handleCommentLike = async (commentId: number) => {
+    const handleCommentLike = async (commentId: number, cancel: boolean) => {
       if (!isLogin.value) {
         message.warning('请先登录后再点赞');
         return;
       }
+      const targetComment = findCommentInTree(comments.value, commentId);
       try {
-        await voteComment(commentId, user.value.id);
-        const targetComment = findCommentInTree(comments.value, commentId);
-        if (targetComment) {
+        await voteComment(commentId, user.value.id, cancel);
+        if (cancel) {
+          targetComment.voteCount = Math.max((targetComment.voteCount || 1) - 1, 0);
+          targetComment.isVoted = false;
+          message.info('已取消点赞');
+        } else {
           targetComment.voteCount = (targetComment.voteCount || 0) + 1;
+          targetComment.isVoted = true;
+          message.success({ content: '点赞成功', style: { color: '#1677ff' } });
         }
-        message.success('点赞成功');
       } catch (error) {
-        message.error('点赞失败，请稍后再试');
+        message.error('操作失败，请稍后再试');
       }
     };
 

@@ -1,6 +1,7 @@
 package com.example.obwiki.controller;
 
 import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,8 +30,9 @@ public class CommentController {
     }
 
     @PostMapping("/vote/{id}")
-    public Comment voteComment(@PathVariable Long id) {
-        commentService.voteComment(id);
-        return commentService.getCommentById(id);
+    public void voteComment(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        Long userId = Long.valueOf(body.get("userId").toString());
+        Boolean cancel = body.get("cancel") != null && (Boolean) body.get("cancel");
+        commentService.voteComment(id, userId, cancel);
     }
 } 

@@ -4,8 +4,9 @@
       <a-button type="link" size="small" @click="toggleReplyFor(comment.id)">
         <message-outlined /> 回复
       </a-button>
-      <a-button type="link" size="small" @click="$emit('like-comment', comment.id)">
-        <like-outlined /> {{ comment.voteCount || 0 }} 点赞
+      <a-button type="link" size="small" @click="handleLike(comment)">
+        <like-outlined :style="{ color: comment.isVoted ? 'blue' : '#aaa' }" />
+        {{ comment.voteCount || 0 }} {{ comment.isVoted ? '已点赞' : '点赞' }}
       </a-button>
     </template>
     <template #author><a>{{ comment.username || comment.userId }}</a></template>
@@ -32,8 +33,9 @@
              <a-button type="link" size="small" @click="toggleReplyFor(reply.id)">
                <message-outlined /> 回复
              </a-button>
-             <a-button type="link" size="small" @click="$emit('like-comment', reply.id)">
-               <like-outlined /> {{ reply.voteCount || 0 }} 点赞
+             <a-button type="link" size="small" @click="handleLike(reply)">
+               <like-outlined :style="{ color: reply.isVoted ? 'blue' : '#aaa' }" />
+               {{ reply.voteCount || 0 }} {{ reply.isVoted ? '已点赞' : '点赞' }}
              </a-button>
            </template>
            <template #author>
@@ -108,6 +110,11 @@ export default defineComponent({
       replying.value = false;
     };
 
+    const handleLike = (comment: any) => {
+      const cancel = !!comment.isVoted;
+      emit('like-comment', comment.id, cancel);
+    };
+
     const flatten = (comments: any[]): any[] => {
       let result: any[] = [];
       for (const comment of comments) {
@@ -138,6 +145,7 @@ export default defineComponent({
       toggleReplyFor,
       handleReply,
       flattenedReplies,
+      handleLike,
     };
   },
 });

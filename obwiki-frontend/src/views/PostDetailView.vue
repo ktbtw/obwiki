@@ -11,8 +11,13 @@
               <a-tag color="blue">
                 <eye-outlined /> {{ post.viewCount || 0 }} 浏览
               </a-tag>
-              <a-tag :color="post.isVoted ? 'red' : 'default'" @click="handleVote">
-                <like-outlined /> {{ post.voteCount || 0 }} 点赞
+              <a-tag
+                :color="post.isVoted ? 'blue' : 'default'"
+                @click="handleVote"
+                style="cursor: pointer;"
+              >
+                <like-outlined :style="{ color: post.isVoted ? 'blue' : '#aaa' }" />
+                {{ post.voteCount || 0 }} {{ post.isVoted ? '已点赞' : '点赞' }}
               </a-tag>
               <a-divider type="vertical" />
               <span style="display:none">{{ console.log('post对象:', post) }}</span>
@@ -144,14 +149,20 @@ export default defineComponent({
         message.warning('请先登录后再点赞');
         return;
       }
-
+      const cancel = !!post.value.isVoted;
       try {
-        await votePost(post.value.id, user.value.id);
-        post.value.voteCount = (post.value.voteCount || 0) + 1;
-        post.value.isVoted = true;
-        message.success('点赞成功');
+        await votePost(post.value.id, user.value.id, cancel);
+        if (cancel) {
+          post.value.voteCount = Math.max((post.value.voteCount || 1) - 1, 0);
+          post.value.isVoted = false;
+          message.info('已取消点赞');
+        } else {
+          post.value.voteCount = (post.value.voteCount || 0) + 1;
+          post.value.isVoted = true;
+          message.success({ content: '点赞成功', style: { color: '#1677ff' } });
+        }
       } catch (error) {
-        message.error('点赞失败，请稍后再试');
+        message.error('操作失败，请稍后再试');
       }
     };
 

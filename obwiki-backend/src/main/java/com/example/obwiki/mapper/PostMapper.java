@@ -12,4 +12,8 @@ public interface PostMapper {
     Post selectById(@Param("id") Long id);
     void increaseVoteCount(@Param("id") Long id);
     void increaseViewCount(@Param("id") Long id);
+    int insertVote(@Param("postId") Long postId, @Param("userId") Long userId);
+    int deleteVote(@Param("postId") Long postId, @Param("userId") Long userId);
+    int existsVote(@Param("postId") Long postId, @Param("userId") Long userId);
+    int decreaseVoteCount(@Param("id") Long id);
 } 

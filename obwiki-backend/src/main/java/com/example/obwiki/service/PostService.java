@@ -37,7 +37,16 @@ public class PostService {
         return postDetailDto;
     }
 
-    public void votePost(Long id) {
-        postMapper.increaseVoteCount(id);
+    public void votePost(Long postId, Long userId, boolean cancel) {
+        if (cancel) {
+            postMapper.decreaseVoteCount(postId);
+            postMapper.deleteVote(postId, userId);
+        } else {
+            // 防止重复点赞
+            if (postMapper.existsVote(postId, userId) == 0) {
+                postMapper.insertVote(postId, userId);
+                postMapper.increaseVoteCount(postId);
+            }
+        }
     }
 } 

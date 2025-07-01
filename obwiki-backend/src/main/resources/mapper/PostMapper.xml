@@ -27,4 +27,17 @@
     <update id="increaseViewCount">
         UPDATE post SET view_count = view_count + 1 WHERE id = #{id}
     </update>
+
+    <insert id="insertVote" parameterType="map">
+        INSERT INTO post_vote(post_id, user_id) VALUES (#{postId}, #{userId})
+    </insert>
+    <delete id="deleteVote" parameterType="map">
+        DELETE FROM post_vote WHERE post_id = #{postId} AND user_id = #{userId}
+    </delete>
+    <select id="existsVote" parameterType="map" resultType="int">
+        SELECT COUNT(*) FROM post_vote WHERE post_id = #{postId} AND user_id = #{userId}
+    </select>
+    <update id="decreaseVoteCount">
+        UPDATE post SET vote_count = vote_count - 1 WHERE id = #{id} AND vote_count > 0
+    </update>
 </mapper> 

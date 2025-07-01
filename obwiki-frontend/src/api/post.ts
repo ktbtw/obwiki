@@ -36,6 +36,6 @@ export function getPostDetail(id: string) {
 }
 
 // 文章点赞
-export function votePost(postId: number, userId: number) {
-    return api.post(`/api/post/vote/${postId}`, { userId });
+export function votePost(postId: number, userId: number, cancel: boolean) {
+    return api.post(`/api/post/vote/${postId}`, { userId, cancel });
 } 

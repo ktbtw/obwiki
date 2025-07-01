@@ -177,7 +177,7 @@ export default defineComponent({
           userId: user.value?.id,
         };
       }
-
+      console.log('发表评论时的 userId:', user.value?.id, '全局 user:', store.state.user, 'params:', params);
       try {
         await createComment(params);
         message.success('评论发表成功');

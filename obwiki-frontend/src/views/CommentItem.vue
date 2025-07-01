@@ -36,17 +36,17 @@
                <like-outlined /> {{ reply.voteCount || 0 }} 点赞
              </a-button>
            </template>
-           <template #author><a>{{ reply.username || reply.userId }}</a></template>
+           <template #author>
+             <span>
+               <b>{{ reply.username }}</b>
+               <span v-if="reply.replyToUsername"> -> <b>{{ reply.replyToUsername }}</b></span>
+             </span>
+           </template>
            <template #avatar>
              <a-avatar :src="`https://i.pravatar.cc/150?u=${reply.userId}`" :alt="reply.username"/>
            </template>
            <template #content>
-              <p>
-                <span v-if="reply.replyToUsername">
-                  回复 <b>{{ reply.replyToUsername }}</b>:
-                </span>
-                {{ reply.content }}
-              </p>
+              <p>{{ reply.content }}</p>
            </template>
            <!-- 子评论的回复输入框 -->
            <div v-if="activeReplyId === reply.id" class="reply-input-wrapper">

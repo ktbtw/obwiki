@@ -146,8 +146,9 @@ const login = () => {
     if (data.success) {
       loginModalVisible.value = false;
       console.log("登录成功返回数据:", data);
-      //vuex进行数据保存   存储数据库返回数据
+      console.log('后端返回的 userId:', data.content.id, 'user对象:', data.content);
       store.commit("setUser", data.content);
+      console.log('保存到全局后的 user:', store.state.user);
       message.success("登录成功！");
     } else {
       message.error(data.message);

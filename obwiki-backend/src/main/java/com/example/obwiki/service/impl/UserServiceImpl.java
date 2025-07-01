@@ -1,5 +1,10 @@
 package com.example.obwiki.service.impl;
 
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -19,12 +24,6 @@ import com.example.obwiki.resp.UserQueryResp;
 import com.example.obwiki.service.IUserService;
 import com.example.obwiki.utils.CopyUtil;
 import com.example.obwiki.utils.SnowFlake;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * <p>

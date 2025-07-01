@@ -15,6 +15,7 @@ public class CommentService {
     private CommentMapper commentMapper;
 
     public int addComment(Comment comment) {
+        System.out.println("插入评论参数：" + comment);
         return commentMapper.insert(comment);
     }
 
@@ -46,10 +47,18 @@ public class CommentService {
                         parent.setChildren(new ArrayList<>());
                     }
                     parent.getChildren().add(comment);
-                    // 设置被回复人的用户名
-                    comment.setReplyToUsername(parent.getUsername());
+                    // 设置被回复人的用户名，兜底处理
+                    String parentName = parent.getUsername();
+                    if (parentName == null || parentName.trim().isEmpty()) {
+                        parentName = String.valueOf(parent.getUserId());
+                    }
+                    comment.setReplyToUsername(parentName);
                 }
             }
+        }
+        // 日志排查：打印每条评论的id、userId、username
+        for (Comment comment : allComments) {
+            System.out.println("评论ID: " + comment.getId() + ", userId: " + comment.getUserId() + ", username: " + comment.getUsername());
         }
         return rootComments;
     }

@@ -6,7 +6,18 @@
         VALUES (#{postId}, #{userId}, #{content}, NOW(), #{parentId})
     </insert>
 
-    <select id="selectByPostId" parameterType="long" resultType="com.example.obwiki.entity.Comment">
+    <resultMap id="CommentResultMap" type="com.example.obwiki.entity.Comment">
+        <id property="id" column="id"/>
+        <result property="postId" column="post_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="content" column="content"/>
+        <result property="createTime" column="create_time"/>
+        <result property="voteCount" column="voteCount"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="username" column="username"/>
+    </resultMap>
+
+    <select id="selectByPostId" parameterType="long" resultMap="CommentResultMap">
         SELECT
             c.id,
             c.post_id,

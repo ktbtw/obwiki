@@ -1,5 +1,19 @@
 package com.example.obwiki.controller;
 
+import java.util.concurrent.TimeUnit;
+import javax.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.util.DigestUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSONObject;
 import com.example.obwiki.rep.UserLoginReq;
 import com.example.obwiki.rep.UserQueryReq;
@@ -11,15 +25,6 @@ import com.example.obwiki.resp.UserLoginResp;
 import com.example.obwiki.resp.UserQueryResp;
 import com.example.obwiki.service.IUserService;
 import com.example.obwiki.utils.SnowFlake;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.util.DigestUtils;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.util.concurrent.TimeUnit;
 
 /**
  * <p>

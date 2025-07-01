@@ -126,7 +126,7 @@
             :before-upload="beforeUpload"
             @change="handleAvatarChange"
           >
-            <a-avatar :src="getImageUrl(user.avatar)" icon="user" style="cursor:pointer"/>
+            <a-avatar :src="getImageUrl(user.avatar)" icon="user" style="cursor:pointer" :size="64"/>
             <a-button>上传头像</a-button>
           </a-upload>
         </a-form-item>
@@ -171,7 +171,7 @@ const columns = [
         title: '头像',
         key: 'avatar',
         dataIndex: 'avatar',
-        customRender: ({ text }: { text: string }) => text ? h('img', { src: text, style: 'width:32px;height:32px;borderRadius:"50%"' }) : ''
+        customRender: ({ text }: { text: string }) => text ? h('img', { src: getImageUrl(text), style: 'width:64px;height:64px;borderRadius:"50%"' }) : ''
     },
     {
         title: 'Action',
@@ -334,18 +334,13 @@ const beforeUpload = (file: File) => {
 const baseURL = api.defaults.baseURL?.replace(/\/$/, '') || '';
 function getImageUrl(path: string) {
   if (!path) return '';
-  // 如果已经是完整URL则直接返回
   if (/^https?:\/\//.test(path)) return path;
   return baseURL + path;
 }
 
 const handleAvatarChange = async (info: any) => {
-  console.log('上传响应:', info);
-  if (info.file.status === 'uploading') return;
   if (info.file.status === 'done') {
-    console.log('后端返回内容:', info.file.response);
     user.value.avatar = info.file.response.content;
-    console.log('赋值后user.avatar:', user.value.avatar);
     message.success('头像上传成功');
   } else if (info.file.status === 'error') {
     message.error('头像上传失败');

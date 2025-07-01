@@ -5,7 +5,7 @@ const USER = 'USER';//声明key
  const store = createStore({
   state: {
     //创建用户对象
-    user:SessionStorage.get(USER) || {}
+    user: SessionStorage.get(USER) || { id: null }
   },
   getters: {
   },

@@ -77,6 +77,17 @@
                     <a-button type="link">
                       <share-alt-outlined /> 分享
                     </a-button>
+                    <a-button
+                      v-if="isLogin && String(item.userId) === String(currentUserId)"
+                      type="link"
+                      danger
+                      @click="handleDeletePost(item.id)"
+                    >
+                      删除
+                    </a-button>
+                    <span style="display:none">
+                      {{ console.log('删除按钮条件:', isLogin, user.value, item.userId, user.value && item.userId === user.value.id, typeof item.userId, typeof (user.value && user.value.id)) }}
+                    </span>
                   </a-space>
                 </template>
               </a-card>
@@ -125,8 +136,9 @@
 
 <script lang="ts">
 import api from '@/api/index';
-import { createPost, getPostList } from '@/api/post';
+import { createPost, deletePost, getPostList } from '@/api/post';
 import store from '@/store';
+import SessionStorage from '@/utils/session-storage';
 import {
 ClockCircleOutlined,
 EyeOutlined,
@@ -237,6 +249,17 @@ export default defineComponent({
       router.push({ path: `/post/${postId}`, query: { scrollTo: 'comment' } });
     };
 
+    const handleDeletePost = async (postId: number) => {
+      if (!window.confirm('确定要删除这篇文章吗？删除后不可恢复！')) return;
+      try {
+        await deletePost(postId);
+        message.success('删除成功');
+        await loadPosts();
+      } catch (error) {
+        message.error('删除失败，请稍后再试');
+      }
+    };
+
     let websocket: any = null;
     let wsToken: string = '';
 
@@ -260,6 +283,10 @@ export default defineComponent({
       }
     };
 
+    const USER = 'USER';
+    const sessionUser = SessionStorage.get(USER) || {};
+    const currentUserId = sessionUser.id;
+
     onMounted(() => {
       loadPosts();
       initWebSocket();
@@ -280,7 +307,10 @@ export default defineComponent({
       showModal,
       handleOk,
       goToComment,
-      getImageUrl
+      getImageUrl,
+      handleDeletePost,
+      user,
+      currentUserId
     };
   }
 });

@@ -38,4 +38,9 @@ export function getPostDetail(id: string, userId: string | number) {
 // 文章点赞
 export function votePost(postId: number, userId: number, cancel: boolean) {
     return api.post(`/api/post/vote/${postId}`, { userId, cancel });
+}
+
+// 删除文章
+export function deletePost(postId: number) {
+    return api.delete(`/api/post/${postId}`);
 } 

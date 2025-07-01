@@ -20,7 +20,7 @@
                 {{ post.voteCount || 0 }} {{ post.isVoted ? '已点赞' : '点赞' }}
               </a-tag>
               <a-divider type="vertical" />
-              <span style="display:none">{{ console.log('post对象:', post) }}</span>
+              <span style="display:none">{{ console.log('post对象:', post, 'user:', user.value) }}</span>
               <a-avatar :size="32" :src="getImageUrl(post.avatar)" icon="user" />
               <span class="author">{{ post.username }}</span>
               <a-divider type="vertical" />
@@ -28,6 +28,15 @@
                 <clock-circle-outlined />
                 {{ new Date(post.createTime).toLocaleString() }}
               </span>
+              <a-button
+                v-if="isLogin && user.value && post.userId === user.value.id"
+                danger
+                @click="handleDeletePost"
+                style="margin-left: 8px;"
+              >
+                删除
+              </a-button>
+              <span style="display:none">{{ console.log('删除按钮条件:', isLogin, user.value, post.userId, user.value && post.userId === user.value.id) }}</span>
             </a-space>
           </template>
           <template #tags>
@@ -93,7 +102,7 @@
 <script lang="ts">
 import { createComment, voteComment } from '@/api/comment';
 import api from '@/api/index';
-import { getPostDetail, votePost } from '@/api/post';
+import { deletePost, getPostDetail, votePost } from '@/api/post';
 import store from '@/store';
 import { Tool } from '@/utils/tool';
 import {
@@ -266,6 +275,18 @@ export default defineComponent({
       }
     };
 
+    const handleDeletePost = async () => {
+      console.log('点击删除按钮，post:', post.value, 'user:', user.value);
+      if (!window.confirm('确定要删除这篇文章吗？删除后不可恢复！')) return;
+      try {
+        await deletePost(post.value.id);
+        message.success('删除成功');
+        router.push('/');
+      } catch (error) {
+        message.error('删除失败，请稍后再试');
+      }
+    };
+
     // 封装图片URL生成方法
     const baseURL = api.defaults.baseURL?.replace(/\/$/, '') || '';
     function getImageUrl(path: string) {
@@ -303,7 +324,9 @@ export default defineComponent({
       handleVote,
       submitComment,
       handleCommentLike,
-      getImageUrl
+      getImageUrl,
+      handleDeletePost,
+      user
     };
   }
 });

@@ -17,4 +17,7 @@ public class UserQueryResp {
 
     //密码
     private String password;
+
+    //头像
+    private String avatar;
 }

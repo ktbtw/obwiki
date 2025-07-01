@@ -16,4 +16,6 @@ public class UserLoginResp {
     private String name;
 
     private String token;
+
+    private String avatar;
 }

@@ -14,4 +14,6 @@ public  class UserSaveReq {
     private String name;
     //密码
     private String password;
+    //头像
+    private String avatar;
 }

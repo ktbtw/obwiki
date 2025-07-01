@@ -1,5 +1,7 @@
 package com.example.obwiki.controller;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import javax.validation.Valid;
 import org.slf4j.Logger;
@@ -13,7 +15,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import com.alibaba.fastjson.JSONObject;
 import com.example.obwiki.rep.UserLoginReq;
 import com.example.obwiki.rep.UserQueryReq;
@@ -104,5 +108,31 @@ public class UserController {
         CommonResp resp = new CommonResp<>(true,"成功",null);
         userService.resetPassword(req);
         return resp;
+    }
+
+    @PostMapping("/uploadAvatar")
+    public CommonResp<String> uploadAvatar(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            LOG.warn("上传头像失败：文件为空");
+            return new CommonResp<>(false, "文件为空", null);
+        }
+        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+        // 使用项目根目录下的avatar文件夹，确保目录存在
+        String filePath = System.getProperty("user.dir") + "/avatar/";
+        File dir = new File(filePath);
+        if (!dir.exists()) {
+            boolean created = dir.mkdirs();
+            LOG.info("头像目录不存在，已自动创建：{}，结果：{}", filePath, created);
+        }
+        File dest = new File(filePath + fileName);
+        try {
+            file.transferTo(dest);
+            String url = "/avatar/" + fileName;
+            LOG.info("头像上传成功，文件名：{}，存储路径：{}，访问URL：{}", fileName, dest.getAbsolutePath(), url);
+            return new CommonResp<>(true, "上传成功", url);
+        } catch (IOException e) {
+            LOG.error("头像上传异常：", e);
+            return new CommonResp<>(false, "上传失败", null);
+        }
     }
 }

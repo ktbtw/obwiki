@@ -9,7 +9,7 @@
           >
             <a-form-item>
               <a-input
-                v-model:value="param.name"
+                v-model="param.name"
                 placeholder="名称"
               />
             </a-form-item>
@@ -86,7 +86,7 @@
       >
         <a-form-item label="新密码">
           <a-input
-            v-model:value="user.password"
+            v-model="user.password"
             type="password"
           />
         </a-form-item>
@@ -105,18 +105,30 @@
       >
         <a-form-item label="登录名">
           <a-input
-            v-model:value="user.loginName"
+            v-model="user.loginName"
             :disabled="!!user.id"
           />
         </a-form-item>
         <a-form-item label="昵称">
-          <a-input v-model:value="user.name" />
+          <a-input v-model="user.name" />
         </a-form-item>
         <a-form-item
           v-show="!user.id"
           label="密码"
         >
-          <a-input v-model:value="user.password" />
+          <a-input v-model="user.password" />
+        </a-form-item>
+        <a-form-item label="头像">
+          <a-upload
+            :show-upload-list="false"
+            name="file"
+            :custom-request="customAvatarRequest"
+            :before-upload="beforeUpload"
+            @change="handleAvatarChange"
+          >
+            <a-avatar :src="getImageUrl(user.avatar)" icon="user" style="cursor:pointer"/>
+            <a-button>上传头像</a-button>
+          </a-upload>
         </a-form-item>
       </a-form>
     </a-modal>
@@ -124,10 +136,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
 import api from '@/api/index';
 import { Tool } from "@/utils/tool";
 import { message } from "ant-design-vue";
+import { h, onMounted, ref } from 'vue';
 const users = ref();//定义查询用户返回集合
 const param = ref();
 param.value = {};
@@ -156,10 +168,15 @@ const columns = [
         dataIndex: 'password'
     },
     {
+        title: '头像',
+        key: 'avatar',
+        dataIndex: 'avatar',
+        customRender: ({ text }: { text: string }) => text ? h('img', { src: text, style: 'width:32px;height:32px;borderRadius:"50%"' }) : ''
+    },
+    {
         title: 'Action',
         key: 'action',
         dataIndex: 'action'
-
     }
 ];
 
@@ -299,6 +316,53 @@ const handleModalOk = () => {
             modalLoading.value = false;
         }
     })
+};
+
+const beforeUpload = (file: File) => {
+  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+  if (!isJpgOrPng) {
+    message.error('只能上传JPG/PNG文件!');
+  }
+  const isLt2M = file.size / 1024 / 1024 < 2;
+  if (!isLt2M) {
+    message.error('图片必须小于2MB!');
+  }
+  return isJpgOrPng && isLt2M;
+};
+
+// 封装图片URL生成方法
+const baseURL = api.defaults.baseURL?.replace(/\/$/, '') || '';
+function getImageUrl(path: string) {
+  if (!path) return '';
+  // 如果已经是完整URL则直接返回
+  if (/^https?:\/\//.test(path)) return path;
+  return baseURL + path;
+}
+
+const handleAvatarChange = async (info: any) => {
+  console.log('上传响应:', info);
+  if (info.file.status === 'uploading') return;
+  if (info.file.status === 'done') {
+    console.log('后端返回内容:', info.file.response);
+    user.value.avatar = info.file.response.content;
+    console.log('赋值后user.avatar:', user.value.avatar);
+    message.success('头像上传成功');
+  } else if (info.file.status === 'error') {
+    message.error('头像上传失败');
+  }
+};
+
+const customAvatarRequest = async (options: any) => {
+  const formData = new FormData();
+  formData.append('file', options.file);
+  try {
+    const resp = await api.post('/user/uploadAvatar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    options.onSuccess(resp.data, options.file);
+  } catch (err) {
+    options.onError(err);
+  }
 };
 
 </script>

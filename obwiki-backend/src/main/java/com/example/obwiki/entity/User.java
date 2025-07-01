@@ -40,6 +40,11 @@ public class User implements Serializable {
      */
     private String password;
 
+    /**
+     * 头像URL
+     */
+    private String avatar;
+
 
     public Long getId() {
         return id;
@@ -73,6 +78,14 @@ public class User implements Serializable {
         this.password = password;
     }
 
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -80,6 +93,7 @@ public class User implements Serializable {
         ", loginName=" + loginName +
         ", name=" + name +
         ", password=" + password +
+        ", avatar=" + avatar +
         "}";
     }
 }

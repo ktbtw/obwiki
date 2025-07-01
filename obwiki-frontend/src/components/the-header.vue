@@ -128,6 +128,7 @@ const logout = () => {
     if (data.success) {
       message.success("退出登录成功！");
       store.commit("setUser", {});
+      location.reload();
     } else {
       message.error(data.message);
     }
@@ -150,6 +151,7 @@ const login = () => {
       store.commit("setUser", data.content);
       console.log('保存到全局后的 user:', store.state.user);
       message.success("登录成功！");
+      location.reload();
     } else {
       message.error(data.message);
       loginModalLoading.value = false;

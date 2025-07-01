@@ -59,7 +59,7 @@
                   </template>
                   <template #description>
                     <a-space>
-                      <span class="author">作者ID: {{ item.userId }}</span>
+                      <span class="author">作者: {{ item.username }}</span>
                       <a-divider type="vertical" />
                       <span class="time">
                         <clock-circle-outlined />

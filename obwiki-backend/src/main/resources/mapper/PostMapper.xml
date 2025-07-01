@@ -7,11 +7,17 @@
     </insert>
 
     <select id="selectAll" resultType="com.example.obwiki.entity.Post">
-        SELECT * FROM post ORDER BY create_time DESC
+        SELECT p.*, u.name AS username
+        FROM post p
+        LEFT JOIN user u ON p.user_id = u.id
+        ORDER BY p.create_time DESC
     </select>
 
     <select id="selectById" parameterType="long" resultType="com.example.obwiki.entity.Post">
-        SELECT * FROM post WHERE id = #{id}
+        SELECT p.*, u.name AS username
+        FROM post p
+        LEFT JOIN user u ON p.user_id = u.id
+        WHERE p.id = #{id}
     </select>
 
     <update id="increaseVoteCount">

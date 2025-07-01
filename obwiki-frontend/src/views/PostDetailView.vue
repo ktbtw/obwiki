@@ -15,8 +15,9 @@
                 <like-outlined /> {{ post.voteCount || 0 }} 点赞
               </a-tag>
               <a-divider type="vertical" />
-              <a-avatar :size="32">{{ post.userId }}</a-avatar>
-              <span class="author">{{ post.userId }}</span>
+              <span style="display:none">{{ console.log('post对象:', post) }}</span>
+              <a-avatar :size="32">{{ post.username }}</a-avatar>
+              <span class="author">{{ post.username }}</span>
               <a-divider type="vertical" />
               <span class="time">
                 <clock-circle-outlined />

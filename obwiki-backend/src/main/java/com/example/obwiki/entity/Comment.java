@@ -18,6 +18,8 @@ public class Comment {
 
     private boolean isVoted;
 
+    private String avatar;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -50,4 +52,7 @@ public class Comment {
 
     public boolean getIsVoted() { return isVoted; }
     public void setIsVoted(boolean isVoted) { this.isVoted = isVoted; }
+
+    public String getAvatar() { return avatar; }
+    public void setAvatar(String avatar) { this.avatar = avatar; }
 } 

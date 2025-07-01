@@ -15,6 +15,7 @@
         <result property="voteCount" column="voteCount"/>
         <result property="parentId" column="parent_id"/>
         <result property="username" column="username"/>
+        <result property="avatar" column="avatar"/>
     </resultMap>
 
     <select id="selectByPostId" parameterType="long" resultMap="CommentResultMap">
@@ -26,7 +27,8 @@
             c.create_time,
             c.vote_count AS voteCount,
             c.parent_id,
-            u.name AS username
+            u.name AS username,
+            u.avatar AS avatar
         FROM
             comment c
         LEFT JOIN

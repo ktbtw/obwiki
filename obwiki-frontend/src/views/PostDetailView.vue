@@ -134,32 +134,50 @@ export default defineComponent({
 
     let websocket: any = null;
     let wsToken: string = '';
+    let reconnectTimer: any = null;
+    let reconnectAttempts = 0;
+    const MAX_RECONNECT_ATTEMPTS = 10;
 
     const USER = 'USER';
     const sessionUser = SessionStorage.get(USER) || {};
     const currentUserId = sessionUser.id;
 
-    // WebSocket实时刷新
+    // WebSocket实时刷新，带自动重连
     const initWebSocket = () => {
       if ('WebSocket' in window) {
         wsToken = Tool.uuid(10);
         websocket = new WebSocket(process.env.VUE_APP_WS_SERVER + '/ws/' + wsToken);
         websocket.onopen = () => {
           console.log('WebSocket连接成功', websocket);
+          reconnectAttempts = 0;
         };
         websocket.onmessage = (event: any) => {
           console.log('WebSocket收到消息:', event.data);
-          // 收到消息自动刷新详情和评论
           loadPost();
         };
         websocket.onerror = (e: any) => {
           console.log('WebSocket连接错误', e);
+          tryReconnect();
         };
         websocket.onclose = (e: any) => {
           console.log('WebSocket连接关闭', e);
+          tryReconnect();
         };
       }
     };
+
+    function tryReconnect() {
+      if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+        reconnectAttempts++;
+        clearTimeout(reconnectTimer);
+        reconnectTimer = setTimeout(() => {
+          console.log(`WebSocket尝试重连，第${reconnectAttempts}次`);
+          initWebSocket();
+        }, 2000 * reconnectAttempts);
+      } else {
+        console.log('WebSocket重连次数已达上限，停止重连');
+      }
+    }
 
     const loadPost = async () => {
       loading.value = true;
@@ -306,9 +324,8 @@ export default defineComponent({
 
     // 组件卸载时关闭WebSocket
     onUnmounted(() => {
-      if (websocket) {
-        websocket.close();
-      }
+      if (websocket) websocket.close();
+      clearTimeout(reconnectTimer);
     });
 
     return {

@@ -272,26 +272,45 @@ export default defineComponent({
 
     let websocket: any = null;
     let wsToken: string = '';
+    let reconnectTimer: any = null;
+    let reconnectAttempts = 0;
+    const MAX_RECONNECT_ATTEMPTS = 10;
 
-    // WebSocket实时刷新
+    // WebSocket实时刷新，带自动重连
     const initWebSocket = () => {
       if ('WebSocket' in window) {
         wsToken = Math.random().toString(36).slice(2, 12);
         websocket = new WebSocket(process.env.VUE_APP_WS_SERVER + '/ws/' + wsToken);
         websocket.onopen = () => {
           console.log('WebSocket连接成功');
+          reconnectAttempts = 0;
         };
         websocket.onmessage = () => {
           loadPosts();
         };
         websocket.onerror = () => {
           console.log('WebSocket连接错误');
+          tryReconnect();
         };
         websocket.onclose = () => {
           console.log('WebSocket连接关闭');
+          tryReconnect();
         };
       }
     };
+
+    function tryReconnect() {
+      if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+        reconnectAttempts++;
+        clearTimeout(reconnectTimer);
+        reconnectTimer = setTimeout(() => {
+          console.log(`WebSocket尝试重连，第${reconnectAttempts}次`);
+          initWebSocket();
+        }, 2000 * reconnectAttempts);
+      } else {
+        console.log('WebSocket重连次数已达上限，停止重连');
+      }
+    }
 
     const USER = 'USER';
     const sessionUser = SessionStorage.get(USER) || {};
@@ -303,6 +322,7 @@ export default defineComponent({
     });
     onUnmounted(() => {
       if (websocket) websocket.close();
+      clearTimeout(reconnectTimer);
     });
 
     return {

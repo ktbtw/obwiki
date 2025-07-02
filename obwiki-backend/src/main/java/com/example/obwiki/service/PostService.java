@@ -71,6 +71,13 @@ public class PostService {
                 postDetailDto.setAvatar(user.getAvatar());
             }
         }
+        // 设置isVoted字段
+        if (userId != null) {
+            boolean isVoted = postMapper.existsVote(id, userId) > 0;
+            postDetailDto.setIsVoted(isVoted);
+        } else {
+            postDetailDto.setIsVoted(false);
+        }
         return postDetailDto;
     }
 

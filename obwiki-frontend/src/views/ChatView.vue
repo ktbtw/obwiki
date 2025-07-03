@@ -47,6 +47,7 @@ const friends = ref([
 ]);
 const currentFriend = ref(null);
 const messages = ref<any[]>([]);
+const messageMap = ref<Record<string, any[]>>({}); // 好友id->消息数组
 const input = ref('');
 
 const showAddFriendModal = ref(false);
@@ -54,6 +55,12 @@ const newFriendName = ref('');
 
 const user = store.state.user;
 let websocket: any = null;
+
+const loadHistory = async (friendId: number) => {
+  const resp = await api.get('/chat/history', { params: { userId: user.id, friendId } });
+  messageMap.value[friendId] = (resp.data && resp.data.content) || [];
+  messages.value = messageMap.value[friendId];
+};
 
 const initWebSocket = () => {
   if ('WebSocket' in window) {
@@ -63,6 +70,22 @@ const initWebSocket = () => {
     };
     websocket.onmessage = (event: any) => {
       const data = JSON.parse(event.data);
+      // 聊天消息
+      if (data.type === 'chat') {
+        const friendId = data.fromUserId === user.id ? data.toUserId : data.fromUserId;
+        if (!messageMap.value[friendId]) messageMap.value[friendId] = [];
+        messageMap.value[friendId].push({
+          id: Date.now(),
+          content: data.content,
+          fromMe: data.fromUserId === user.id,
+          fromUserId: data.fromUserId,
+          toUserId: data.toUserId,
+          time: data.time
+        });
+        if (currentFriend.value && friendId === currentFriend.value.id) {
+          messages.value = messageMap.value[friendId];
+        }
+      }
       // 处理好友请求
       if (data.type === 'friendRequest' && data.toUserId === user.id) {
         Modal.confirm({
@@ -113,14 +136,31 @@ onUnmounted(() => {
 
 function selectFriend(friend: any) {
   currentFriend.value = friend;
-  // TODO: 拉取与该好友的历史消息
-  messages.value = [];
+  loadHistory(friend.id);
 }
 
 function sendMessage() {
-  if (!input.value) return;
-  messages.value.push({ id: Date.now(), content: input.value, fromMe: true });
-  // TODO: 通过WebSocket发送消息到后端
+  if (!input.value || !currentFriend.value) return;
+  const msg = {
+    type: 'chat',
+    fromUserId: user.id,
+    fromUserName: user.name,
+    toUserId: currentFriend.value.id,
+    toUserName: currentFriend.value.name,
+    content: input.value,
+    time: new Date().toISOString().slice(0, 19).replace('T', ' ')
+  };
+  websocket.send(JSON.stringify(msg));
+  if (!messageMap.value[currentFriend.value.id]) messageMap.value[currentFriend.value.id] = [];
+  messageMap.value[currentFriend.value.id].push({
+    id: Date.now(),
+    content: input.value,
+    fromMe: true,
+    fromUserId: user.id,
+    toUserId: currentFriend.value.id,
+    time: msg.time
+  });
+  messages.value = messageMap.value[currentFriend.value.id];
   input.value = '';
 }
 

@@ -14,6 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONObject;
+import com.example.obwiki.entity.ChatMessage;
+import com.example.obwiki.service.IChatMessageService;
+import com.example.obwiki.service.IFriendService;
 
 @Component
 @ServerEndpoint("/ws/{token}")//客户端连接地址
@@ -26,10 +29,16 @@ public class WebSocketServer {
     private static HashMap<String, Session> map = new HashMap<>();
 
     // 假设有FriendService实现加好友
-    private static com.example.obwiki.service.IFriendService friendService;
+    private static IFriendService friendService;
     @Autowired
-    public void setFriendService(com.example.obwiki.service.IFriendService friendService) {
+    public void setFriendService(IFriendService friendService) {
         WebSocketServer.friendService = friendService;
+    }
+
+    private static IChatMessageService chatMessageService;
+    @Autowired
+    public void setChatMessageService(IChatMessageService chatMessageService) {
+        WebSocketServer.chatMessageService = chatMessageService;
     }
 
     //连接成功
@@ -76,6 +85,22 @@ public class WebSocketServer {
                 Long fromUserId = json.getLong("fromUserId");
                 Long toUid = json.getLong("toUserId");
                 friendService.addFriend(fromUserId, toUid);
+            }
+        } else if ("chat".equals(type)) {
+            // 聊天消息，转发并保存
+            String toUserId = json.getString("toUserId");
+            Session toSession = map.get(toUserId);
+            if (toSession != null && toSession.isOpen()) {
+                try { toSession.getBasicRemote().sendText(message); } catch (IOException ignored) {}
+            }
+            // 保存到数据库
+            if (chatMessageService != null) {
+                ChatMessage chatMsg = new ChatMessage();
+                chatMsg.setFromUserId(json.getLong("fromUserId"));
+                chatMsg.setToUserId(json.getLong("toUserId"));
+                chatMsg.setContent(json.getString("content"));
+                chatMsg.setTime(json.getDate("time"));
+                chatMessageService.saveMessage(chatMsg);
             }
         }
     }

@@ -98,6 +98,13 @@ const initWebSocket = () => {
 };
 
 onMounted(() => {
+  // 1. 拉取数据库好友列表
+  api.get('/friend/list', { params: { userId: user.id } }).then(resp => {
+    if (resp.data && resp.data.content) {
+      friends.value = resp.data.content;
+    }
+  });
+  // 2. 初始化WebSocket
   initWebSocket();
 });
 onUnmounted(() => {

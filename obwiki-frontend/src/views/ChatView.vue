@@ -21,8 +21,19 @@
     </div>
     <div class="chat-box">
       <div class="chat-history">
-        <div v-for="msg in messages" :key="msg.id" :class="msg.fromMe ? 'me' : 'other'">
-          <span>{{ msg.content }}</span>
+        <div v-for="msg in messages" :key="msg.id" :class="msg.fromMe ? 'me' : 'other'" class="chat-msg-row">
+          <template v-if="msg.fromMe">
+            <div class="chat-msg-right">
+              <span class="chat-msg-content">{{ msg.content }}</span>
+              <a-avatar :src="getAvatar(msg.fromUserId)" :alt="msg.fromUserId" />
+            </div>
+          </template>
+          <template v-else>
+            <div class="chat-msg-left">
+              <a-avatar :src="getAvatar(msg.fromUserId)" :alt="msg.fromUserId" />
+              <span class="chat-msg-content">{{ msg.content }}</span>
+            </div>
+          </template>
         </div>
       </div>
       <div class="chat-input">
@@ -40,7 +51,7 @@
 import api from '@/api/index';
 import store from '@/store';
 import { message, Modal } from 'ant-design-vue';
-import { onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, onUnmounted, reactive, ref } from 'vue';
 
 const friends = ref([
   // 初始可为空，实际应从后端拉取
@@ -56,9 +67,17 @@ const newFriendName = ref('');
 const user = store.state.user;
 let websocket: any = null;
 
+const avatarMap = reactive<Record<string, string>>({}); // userId->avatar
+
 const loadHistory = async (friendId: number) => {
   const resp = await api.get('/chat/history', { params: { userId: user.id, friendId } });
-  messageMap.value[friendId] = (resp.data && resp.data.content) || [];
+  let list = (resp.data && resp.data.content) || [];
+  // 补充fromMe字段，类型统一
+  list = list.map(msg => ({
+    ...msg,
+    fromMe: String(msg.fromUserId) === String(user.id)
+  }));
+  messageMap.value[friendId] = list;
   messages.value = messageMap.value[friendId];
 };
 
@@ -188,6 +207,24 @@ async function handleAddFriend() {
     message.error('查找用户失败');
   }
 }
+
+function fixAvatarUrl(url) {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  return 'http://localhost:8880/obwiki' + url;
+}
+
+function getAvatar(userId) {
+  if (userId === user.id) return fixAvatarUrl(user.avatar);
+  if (avatarMap[userId]) return fixAvatarUrl(avatarMap[userId]);
+  api.get('/user/getById', { params: { id: userId } }).then(resp => {
+    if (resp.data && resp.data.content) {
+      avatarMap[userId] = resp.data.content.avatar;
+      messages.value = [...messages.value]; // 强制刷新
+    }
+  });
+  return '';
+}
 </script>
 
 <style scoped>
@@ -197,7 +234,11 @@ async function handleAddFriend() {
 .chat-box { flex: 1; display: flex; flex-direction: column; }
 .chat-history { flex: 1; padding: 16px; overflow-y: auto; }
 .chat-input { padding: 12px; border-top: 1px solid #eee; }
-.me { text-align: right; color: #1890ff; margin: 8px 0; }
-.other { text-align: left; color: #333; margin: 8px 0; }
+.chat-msg-row { display: flex; margin: 8px 0; }
+.chat-msg-left { display: flex; align-items: center; gap: 8px; }
+.chat-msg-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.chat-msg-content { max-width: 320px; background: #f5f5f5; border-radius: 6px; padding: 8px 14px; word-break: break-all; }
+.me .chat-msg-content { background: #e6f7ff; color: #1890ff; }
+.other .chat-msg-content { background: #f5f5f5; color: #333; }
 .active { background: #e6f7ff; }
 </style> 

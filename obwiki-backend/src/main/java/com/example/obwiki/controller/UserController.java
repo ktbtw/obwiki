@@ -155,4 +155,22 @@ public class UserController {
         }
         return resp;
     }
+
+    @GetMapping("/getById")
+    public CommonResp<UserQueryResp> getById(@RequestParam Long id) {
+        CommonResp<UserQueryResp> resp = new CommonResp<>();
+        com.example.obwiki.entity.User user = userService.getById(id);
+        if (user == null) {
+            resp.setContent(null);
+            resp.setSuccess(false);
+            resp.setMessage("未找到该用户");
+        } else {
+            com.example.obwiki.resp.UserQueryResp userResp = new com.example.obwiki.resp.UserQueryResp();
+            userResp.setId(user.getId());
+            userResp.setName(user.getName());
+            userResp.setAvatar(user.getAvatar());
+            resp.setContent(userResp);
+        }
+        return resp;
+    }
 }

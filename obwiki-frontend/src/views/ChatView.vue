@@ -215,7 +215,10 @@ function fixAvatarUrl(url) {
 }
 
 function getAvatar(userId) {
-  if (userId === user.id) return fixAvatarUrl(user.avatar);
+  if (userId === user.id) {
+    if (!avatarMap[userId]) avatarMap[userId] = user.avatar; // 主动缓存
+    return fixAvatarUrl(user.avatar);
+  }
   if (avatarMap[userId]) return fixAvatarUrl(avatarMap[userId]);
   api.get('/user/getById', { params: { id: userId } }).then(resp => {
     if (resp.data && resp.data.content) {
@@ -235,10 +238,29 @@ function getAvatar(userId) {
 .chat-history { flex: 1; padding: 16px; overflow-y: auto; }
 .chat-input { padding: 12px; border-top: 1px solid #eee; }
 .chat-msg-row { display: flex; margin: 8px 0; }
-.chat-msg-left { display: flex; align-items: center; gap: 8px; }
-.chat-msg-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
-.chat-msg-content { max-width: 320px; background: #f5f5f5; border-radius: 6px; padding: 8px 14px; word-break: break-all; }
-.me .chat-msg-content { background: #e6f7ff; color: #1890ff; }
-.other .chat-msg-content { background: #f5f5f5; color: #333; }
+.chat-msg-left { display: flex; align-items: flex-end; gap: 8px; }
+.chat-msg-right { display: flex; align-items: flex-end; gap: 8px; margin-left: auto; }
+.chat-msg-content {
+  max-width: 320px;
+  border-radius: 16px;
+  padding: 10px 18px;
+  word-break: break-all;
+  font-size: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  margin-bottom: 2px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+}
+.me .chat-msg-content, .chat-msg-right .chat-msg-content {
+  background: #e6f7ff;
+  color: #1677ff;
+  border: 1px solid #91d5ff;
+}
+.other .chat-msg-content, .chat-msg-left .chat-msg-content {
+  background: #f5f5f5;
+  color: #333;
+  border: 1px solid #e4e4e4;
+}
 .active { background: #e6f7ff; }
 </style> 

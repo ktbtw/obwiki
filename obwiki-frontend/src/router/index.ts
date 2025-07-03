@@ -48,6 +48,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'PostDetail',
     component: () => import('../views/PostDetailView.vue'),
     props: true
+  },
+  {
+    path: '/earth',
+    name: 'Earth',
+    component: () => import('../views/EarthView.vue')
   }
 ]
 

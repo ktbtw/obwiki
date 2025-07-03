@@ -38,8 +38,11 @@
           关于我们
         </router-link>
       </a-menu-item>
-
-
+      <a-menu-item key="/earth">
+        <router-link to="/earth">
+          3D地球
+        </router-link>
+      </a-menu-item>
 
       <a-menu-item
         key="user"

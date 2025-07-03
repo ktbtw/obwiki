@@ -135,4 +135,24 @@ public class UserController {
             return new CommonResp<>(false, "上传失败", null);
         }
     }
+
+    @GetMapping("/findByName")
+    public CommonResp<UserQueryResp> findByName(@RequestParam String name) {
+        CommonResp<UserQueryResp> resp = new CommonResp<>();
+        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<com.example.obwiki.entity.User> wrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+        wrapper.eq("name", name);
+        com.example.obwiki.entity.User user = userService.getOne(wrapper);
+        if (user == null) {
+            resp.setContent(null);
+            resp.setSuccess(false);
+            resp.setMessage("未找到该用户");
+        } else {
+            com.example.obwiki.resp.UserQueryResp userResp = new com.example.obwiki.resp.UserQueryResp();
+            userResp.setId(user.getId());
+            userResp.setName(user.getName());
+            userResp.setAvatar(user.getAvatar());
+            resp.setContent(userResp);
+        }
+        return resp;
+    }
 }

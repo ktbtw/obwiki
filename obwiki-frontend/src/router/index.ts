@@ -53,6 +53,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/earth',
     name: 'Earth',
     component: () => import('../views/EarthView.vue')
+  },
+  {
+    path: '/chat',
+    name: 'Chat',
+    component: () => import('../views/ChatView.vue')
   }
 ]
 

@@ -43,6 +43,11 @@
           3D地球
         </router-link>
       </a-menu-item>
+      <a-menu-item key="/chat">
+        <router-link to="/chat">
+          聊天
+        </router-link>
+      </a-menu-item>
 
       <a-menu-item
         key="user"

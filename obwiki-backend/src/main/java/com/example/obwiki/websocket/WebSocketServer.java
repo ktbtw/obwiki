@@ -11,7 +11,9 @@ import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import com.alibaba.fastjson.JSONObject;
 
 @Component
 @ServerEndpoint("/ws/{token}")//客户端连接地址
@@ -22,6 +24,13 @@ public class WebSocketServer {
     private String token = "";
     //放置所有连接
     private static HashMap<String, Session> map = new HashMap<>();
+
+    // 假设有FriendService实现加好友
+    private static com.example.obwiki.service.IFriendService friendService;
+    @Autowired
+    public void setFriendService(com.example.obwiki.service.IFriendService friendService) {
+        WebSocketServer.friendService = friendService;
+    }
 
     //连接成功
     @OnOpen
@@ -45,6 +54,30 @@ public class WebSocketServer {
     public void onMessage(String message, Session session) {
         LOG.info("收到消息：{}，内容：{}", token, message);
         System.out.println("WebSocket收到消息：token=" + token + ", 内容=" + message);
+        JSONObject json = JSONObject.parseObject(message);
+        String type = json.getString("type");
+        if ("friendRequest".equals(type)) {
+            // 好友请求，转发给目标用户
+            String toUserId = json.getString("toUserId");
+            Session toSession = map.get(toUserId);
+            if (toSession != null && toSession.isOpen()) {
+                try { toSession.getBasicRemote().sendText(message); } catch (IOException ignored) {}
+            }
+        } else if ("friendResponse".equals(type)) {
+            // 同意好友请求，转发给发起方
+            String toUserId = json.getString("toUserId");
+            Session toSession = map.get(toUserId);
+            if (toSession != null && toSession.isOpen()) {
+                try { toSession.getBasicRemote().sendText(message); } catch (IOException ignored) {}
+            }
+            // 数据库加好友
+            Boolean accepted = json.getBoolean("accepted");
+            if (accepted != null && accepted && friendService != null) {
+                Long fromUserId = json.getLong("fromUserId");
+                Long toUid = json.getLong("toUserId");
+                friendService.addFriend(fromUserId, toUid);
+            }
+        }
     }
 
     //连接错误

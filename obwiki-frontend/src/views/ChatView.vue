@@ -8,7 +8,10 @@
       >
         <template #renderItem="{ item }">
           <a-list-item :class="{ active: item.id === currentFriend?.id }" @click="selectFriend(item)">
-            {{ item.name }}
+            <span>{{ item.name }}</span>
+            <a-button type="text" danger size="small" style="float:right;" @click.stop="handleDeleteFriend(item)">
+              <DeleteOutlined />
+            </a-button>
           </a-list-item>
         </template>
       </a-list>
@@ -50,6 +53,7 @@
 <script setup lang="ts">
 import api from '@/api/index';
 import store from '@/store';
+import { DeleteOutlined } from '@ant-design/icons-vue';
 import { message, Modal } from 'ant-design-vue';
 import { onMounted, onUnmounted, reactive, ref } from 'vue';
 
@@ -227,6 +231,30 @@ function getAvatar(userId) {
     }
   });
   return '';
+}
+
+function handleDeleteFriend(friend) {
+  Modal.confirm({
+    title: '确认删除',
+    content: `确定要删除好友「${friend.name}」吗？删除后不可恢复！`,
+    okText: '删除',
+    okType: 'danger',
+    cancelText: '取消',
+    onOk: () => {
+      api.delete('/friend/delete', { params: { userId: user.id, friendId: friend.id } }).then(resp => {
+        if (resp.data && resp.data.success) {
+          friends.value = friends.value.filter(f => f.id !== friend.id);
+          if (currentFriend.value && currentFriend.value.id === friend.id) {
+            currentFriend.value = null;
+            messages.value = [];
+          }
+          message.success('已删除好友');
+        } else {
+          message.error(resp.data && resp.data.message || '删除失败');
+        }
+      });
+    }
+  });
 }
 </script>
 

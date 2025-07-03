@@ -3,6 +3,7 @@ package com.example.obwiki.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,6 +35,13 @@ public class FriendController {
         }).collect(Collectors.toList());
         CommonResp<List<FriendInfo>> resp = new CommonResp<>();
         resp.setContent(result);
+        return resp;
+    }
+
+    @DeleteMapping("/delete")
+    public CommonResp delete(@RequestParam Long userId, @RequestParam Long friendId) {
+        friendService.deleteFriend(userId, friendId);
+        CommonResp resp = new CommonResp<>(true, "删除成功", null);
         return resp;
     }
 

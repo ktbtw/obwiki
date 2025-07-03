@@ -36,6 +36,15 @@ public class FriendServiceImpl implements IFriendService {
             friendMapper.insert(f2);
         }
     }
+    
+    public void deleteFriend(Long userId, Long friendId) {
+        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Friend> wrapper1 = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+        wrapper1.eq("user_id", userId).eq("friend_id", friendId);
+        friendMapper.delete(wrapper1);
+        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Friend> wrapper2 = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+        wrapper2.eq("user_id", friendId).eq("friend_id", userId);
+        friendMapper.delete(wrapper2);
+    }
 
     @Override
     public java.util.List<Friend> listFriends(Long userId) {

@@ -24,4 +24,6 @@ public class DocQueryResp {
     private Integer viewCount;
     //点赞数
     private Integer voteCount;
+    private Double lat;
+    private Double lng;
 }

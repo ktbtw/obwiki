@@ -1,8 +1,8 @@
 package com.example.obwiki.entity;
 
+import java.io.Serializable;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import java.io.Serializable;
 
 /**
  * <p>
@@ -48,6 +48,9 @@ public class Doc implements Serializable {
      * 点赞数
      */
     private Integer voteCount;
+
+    private Double lat;
+    private Double lng;
 
     public Long getId() { return id; }
 
@@ -103,6 +106,11 @@ public class Doc implements Serializable {
         this.voteCount = voteCount;
     }
 
+    public Double getLat() { return lat; }
+    public void setLat(Double lat) { this.lat = lat; }
+    public Double getLng() { return lng; }
+    public void setLng(Double lng) { this.lng = lng; }
+
     @Override
     public String toString() {
         return "Doc{" +
@@ -113,6 +121,8 @@ public class Doc implements Serializable {
         ", sort=" + sort +
         ", viewCount=" + viewCount +
         ", voteCount=" + voteCount +
+        ", lat=" + lat +
+        ", lng=" + lng +
         "}";
     }
 }

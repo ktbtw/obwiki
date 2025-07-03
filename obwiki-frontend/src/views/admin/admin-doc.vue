@@ -74,10 +74,26 @@
               :label-col="{ span: 6 }"
               :wrapper-col="{ span: 18 }"
             >
-              <a-form-item>
+              <a-form-item label="名称">
                 <a-input
                   v-model:value="doc.name"
                   placeholder="名称"
+                />
+              </a-form-item>
+              <a-form-item label="纬度">
+                <a-input
+                  v-model:value="doc.lat"
+                  placeholder="请输入纬度"
+                  type="number"
+                  step="0.000001"
+                />
+              </a-form-item>
+              <a-form-item label="经度">
+                <a-input
+                  v-model:value="doc.lng"
+                  placeholder="请输入经度"
+                  type="number"
+                  step="0.000001"
                 />
               </a-form-item>
               <a-form-item>
@@ -149,14 +165,14 @@
 
 <script lang="ts" setup>
 import api from '@/api/index';
-import { ref, onMounted, shallowRef } from 'vue';
 import { Tool } from "@/utils/tool";
+import { Editor, Toolbar } from '@wangeditor/editor-for-vue';
+import '@wangeditor/editor/dist/css/style.css'; // 样式
 import { message } from 'ant-design-vue';
+import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 const route = useRoute();
 const ebookId = route.query.ebookId || '0'; // 默认值为 '0'
-import '@wangeditor/editor/dist/css/style.css' // 样式
-import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 
 
 const editorRef = ref()
@@ -198,6 +214,8 @@ const doc = ref({
   ebookId: 0,
   sort: 0,
   content: '',
+  lat: null,
+  lng: null
 });
 //定义显示文档树 响应式数据,因为树选择组件属性转台会随当前编辑节点而变化  初始值为空
 const treeSelectData = ref<{ id: number; name: string; children?: any[]; disabled?: boolean }[]>([]);
@@ -210,6 +228,8 @@ interface Doc {
   viewCount?: number;
   voteCount?: number;
   content?: string;
+  lat?: number;
+  lng?: number;
 }
 
 /*
@@ -240,7 +260,7 @@ const handleEdit = (record: any) => {
   treeSelectData.value = Tool.copy(level1.value);
   setDisable(treeSelectData.value, record.id);
 
-  //为树选择添加一个“无”的选项
+  //为树选择添加一个"无"的选项
   treeSelectData.value.unshift({ id: 0, name: '无' });
 }
 
@@ -293,11 +313,13 @@ const handleAdd = () => {
     parent: 0, // 初始化为 null 或符合树结构的对象
     name: '',
     sort: 0,
-    content: ''
+    content: '',
+    lat: null,
+    lng: null
   };
   //不能选择当前节点及其子节点，作为父节点，会使得树断开
   treeSelectData.value = Tool.copy(level1.value);
-  //为树选择添加一个“无”的选项
+  //为树选择添加一个"无"的选项
   treeSelectData.value.unshift({ id: 0, name: '无' });
 }
 /**

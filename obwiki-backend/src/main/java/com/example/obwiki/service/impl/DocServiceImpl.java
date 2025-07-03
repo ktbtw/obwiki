@@ -1,5 +1,10 @@
 package com.example.obwiki.service.impl;
 
+import java.util.List;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -23,12 +28,6 @@ import com.example.obwiki.utils.RequestContext;
 import com.example.obwiki.utils.SnowFlake;
 import com.example.obwiki.websocket.WebSocketServer;
 import com.example.obwiki.websocket.WsServiceAsync;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * <p>
@@ -106,8 +105,15 @@ public class DocServiceImpl extends ServiceImpl<DocMapper, Doc> implements IDocS
 
     @Override
     public void save(DocSaveReq req) {
+        // 打印接收到的请求数据，确认前端是否传来经纬度
+        System.out.println("接收到的请求数据: " + req.toString());
+
         Doc doc = CopyUtil.copy(req, Doc.class);
         Content content = CopyUtil.copy(req, Content.class);
+        
+        // 打印拷贝后的实体数据，确认经纬度是否已拷贝
+        System.out.println("拷贝后的doc实体: " + doc.toString());
+
         System.out.println("---------------------");
         System.out.println("<UNK>" + doc + content);
         System.out.println("---------------------");

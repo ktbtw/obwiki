@@ -1,9 +1,8 @@
 package com.example.obwiki.rep;
 
+import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.ToString;
-
-import javax.validation.constraints.NotNull;
 
 @Data
 @ToString
@@ -19,13 +18,14 @@ public class DocSaveReq {
     @NotNull(message = "【名称】不能为空")
     private String name;
 
-    @NotNull(message = "【顺序】不能为空")
     private Integer sort;
 
     private Integer viewCount;
 
     private Integer voteCount;
 
-    @NotNull(message = "【内容】不能为空")
     private String content;
+
+    private Double lat;
+    private Double lng;
 }

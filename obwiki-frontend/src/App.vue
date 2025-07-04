@@ -5,12 +5,35 @@
     <router-view />
 
     <the-footer />
+
+    <!-- 右下角悬浮按钮 -->
+    <a-button
+      type="primary"
+      shape="circle"
+      size="large"
+      style="position: fixed; right: 32px; bottom: 32px; z-index: 1000;"
+      @click="drawerVisible = true"
+    >AI</a-button>
+
+    <!-- 右侧抽屉 -->
+    <a-drawer
+      title="AI 对话"
+      placement="right"
+      :width="360"
+      :open="drawerVisible"
+      @close="drawerVisible = false"
+    >
+      <AIFloatMenu />
+    </a-drawer>
   </a-layout>
 </template>
 
 <script lang="ts" setup>
-import TheHeader from "@/components/the-header.vue";
+import AIFloatMenu from "@/components/AIFloatMenu.vue";
 import TheFooter from "@/components/the-footer.vue";
+import TheHeader from "@/components/the-header.vue";
+import { ref } from 'vue';
+const drawerVisible = ref(false);
 </script>
 
 <style scoped>

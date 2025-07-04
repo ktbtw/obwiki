@@ -51,4 +51,10 @@ public class FriendServiceImpl implements IFriendService {
         return friendMapper.selectList(new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Friend>()
                 .eq("user_id", userId));
     }
+
+    @Override
+    public boolean isFriend(Long userId, Long friendId) {
+        return friendMapper.selectCount(new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Friend>()
+                .eq("user_id", userId).eq("friend_id", friendId)) > 0;
+    }
 } 

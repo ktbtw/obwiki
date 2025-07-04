@@ -57,12 +57,25 @@ import { DeleteOutlined } from '@ant-design/icons-vue';
 import { message, Modal } from 'ant-design-vue';
 import { onMounted, onUnmounted, reactive, ref } from 'vue';
 
-const friends = ref([
-  // 初始可为空，实际应从后端拉取
-]);
-const currentFriend = ref(null);
-const messages = ref<any[]>([]);
-const messageMap = ref<Record<string, any[]>>({}); // 好友id->消息数组
+// 定义类型
+interface Friend {
+  id: number;
+  name: string;
+}
+
+interface ChatMessage {
+  id: number;
+  content: string;
+  fromMe: boolean;
+  fromUserId: number;
+  toUserId: number;
+  time: string;
+}
+
+const friends = ref<Friend[]>([]);
+const currentFriend = ref<Friend | null>(null);
+const messages = ref<ChatMessage[]>([]);
+const messageMap = ref<Record<string, ChatMessage[]>>({}); // 好友id->消息数组
 const input = ref('');
 
 const showAddFriendModal = ref(false);
@@ -77,7 +90,7 @@ const loadHistory = async (friendId: number) => {
   const resp = await api.get('/chat/history', { params: { userId: user.id, friendId } });
   let list = (resp.data && resp.data.content) || [];
   // 补充fromMe字段，类型统一
-  list = list.map(msg => ({
+  list = list.map((msg: any) => ({
     ...msg,
     fromMe: String(msg.fromUserId) === String(user.id)
   }));
@@ -137,6 +150,21 @@ const initWebSocket = () => {
         }
         message.success('你和对方已互为好友！');
       }
+      // 处理好友删除通知
+      if (data.type === 'friendDeleted') {
+        message.error(data.message || '对方已删除你为好友，无法发送消息');
+        // 从好友列表中移除
+        friends.value = friends.value.filter(f => f.id !== data.toUserId);
+        // 如果当前选中的是被删除的好友，清空聊天
+        if (currentFriend.value && currentFriend.value.id === data.toUserId) {
+          currentFriend.value = null;
+          messages.value = [];
+        }
+        // 清空该好友的消息缓存
+        if (messageMap.value[data.toUserId]) {
+          delete messageMap.value[data.toUserId];
+        }
+      }
     };
     websocket.onerror = () => { console.log('WebSocket连接错误'); };
     websocket.onclose = () => { console.log('WebSocket连接关闭'); };
@@ -157,7 +185,7 @@ onUnmounted(() => {
   if (websocket) websocket.close();
 });
 
-function selectFriend(friend: any) {
+function selectFriend(friend: Friend) {
   currentFriend.value = friend;
   loadHistory(friend.id);
 }
@@ -212,13 +240,13 @@ async function handleAddFriend() {
   }
 }
 
-function fixAvatarUrl(url) {
+function fixAvatarUrl(url: string) {
   if (!url) return '';
   if (url.startsWith('http')) return url;
   return 'http://localhost:8880/obwiki' + url;
 }
 
-function getAvatar(userId) {
+function getAvatar(userId: number) {
   if (userId === user.id) {
     if (!avatarMap[userId]) avatarMap[userId] = user.avatar; // 主动缓存
     return fixAvatarUrl(user.avatar);
@@ -233,7 +261,7 @@ function getAvatar(userId) {
   return '';
 }
 
-function handleDeleteFriend(friend) {
+function handleDeleteFriend(friend: Friend) {
   Modal.confirm({
     title: '确认删除',
     content: `确定要删除好友「${friend.name}」吗？删除后不可恢复！`,

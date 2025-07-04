@@ -87,17 +87,38 @@ public class WebSocketServer {
                 friendService.addFriend(fromUserId, toUid);
             }
         } else if ("chat".equals(type)) {
-            // 聊天消息，转发并保存
-            String toUserId = json.getString("toUserId");
-            Session toSession = map.get(toUserId);
+            // 聊天消息，先验证好友关系
+            Long fromUserId = json.getLong("fromUserId");
+            Long toUserId = json.getLong("toUserId");
+            
+            // 检查是否为好友关系
+            if (friendService != null && !friendService.isFriend(fromUserId, toUserId)) {
+                // 不是好友关系，发送拒绝消息给发送方
+                JSONObject rejectMsg = new JSONObject();
+                rejectMsg.put("type", "friendDeleted");
+                rejectMsg.put("message", "对方已删除你为好友，无法发送消息");
+                rejectMsg.put("fromUserId", fromUserId);
+                rejectMsg.put("toUserId", toUserId);
+                
+                Session fromSession = map.get(String.valueOf(fromUserId));
+                if (fromSession != null && fromSession.isOpen()) {
+                    try { 
+                        fromSession.getBasicRemote().sendText(rejectMsg.toJSONString()); 
+                    } catch (IOException ignored) {}
+                }
+                return; // 不处理此消息
+            }
+            
+            // 是好友关系，正常转发消息
+            Session toSession = map.get(String.valueOf(toUserId));
             if (toSession != null && toSession.isOpen()) {
                 try { toSession.getBasicRemote().sendText(message); } catch (IOException ignored) {}
             }
             // 保存到数据库
             if (chatMessageService != null) {
                 ChatMessage chatMsg = new ChatMessage();
-                chatMsg.setFromUserId(json.getLong("fromUserId"));
-                chatMsg.setToUserId(json.getLong("toUserId"));
+                chatMsg.setFromUserId(fromUserId);
+                chatMsg.setToUserId(toUserId);
                 chatMsg.setContent(json.getString("content"));
                 chatMsg.setTime(json.getDate("time"));
                 chatMessageService.saveMessage(chatMsg);

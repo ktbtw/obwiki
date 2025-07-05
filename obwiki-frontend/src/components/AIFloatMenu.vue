@@ -55,29 +55,102 @@
     </div>
 
     <!-- 输入框 -->
-    <div style="display: flex; gap: 8px;">
-      <a-input-search
-        v-model:value="input"
-        enter-button="发送"
-        @search="send"
-        placeholder="和AI聊点什么吧…"
-        :disabled="loading"
-        style="flex: 1;"
-        @keyup.enter="send"
-      />
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <div style="flex: 1; position: relative;">
+        <a-input
+          v-model="input"
+          @input="handleInput"
+          @keydown.enter="send"
+          placeholder="和AI聊点什么吧…"
+          :disabled="loading"
+          :style="{
+            borderRadius: '20px',
+            border: '2px solid #e8e8e8',
+            padding: '8px 16px',
+            fontSize: '14px',
+            transition: 'all 0.3s ease',
+            background: '#fafafa',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+          }"
+          @focus="handleInputFocus"
+          @blur="handleInputBlur"
+        />
+        <div 
+          v-if="loading" 
+          style="
+            position: absolute; 
+            right: 12px; 
+            top: 50%; 
+            transform: translateY(-50%);
+            color: #1890ff;
+          "
+        >
+          <a-spin size="small" />
+        </div>
+      </div>
+      
+      <a-button 
+        type="primary"
+        @click="send"
+        :disabled="loading || !input.trim()"
+        :style="{
+          borderRadius: '20px',
+          height: '40px',
+          padding: '0 20px',
+          border: 'none',
+          fontWeight: '500',
+          fontSize: '14px',
+          transition: 'all 0.3s ease',
+          background: input.trim() && !loading 
+            ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+            : '#d9d9d9',
+          boxShadow: input.trim() && !loading 
+            ? '0 4px 15px rgba(102, 126, 234, 0.4), 0 2px 4px rgba(0,0,0,0.1)' 
+            : 'none',
+          transform: input.trim() && !loading ? 'translateY(0)' : 'translateY(0)'
+        }"
+        @mouseenter="handleSendButtonHover"
+        @mouseleave="handleSendButtonLeave"
+      >
+        <template #icon>
+          <span style="margin-right: 6px;">🚀</span>
+        </template>
+        发送
+      </a-button>
       <a-button 
         size="small" 
         @click="toggleSessionList"
-        :style="{ minWidth: '60px' }"
+        @mouseenter="handleButtonHover"
+        @mouseleave="handleButtonLeave"
+        :style="{
+          minWidth: '80px',
+          height: '32px',
+          borderRadius: '16px',
+          border: 'none',
+          color: 'white',
+          fontWeight: '500',
+          fontSize: '12px',
+          transition: 'all 0.3s ease',
+          background: showSessionList 
+            ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+            : 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+          boxShadow: showSessionList 
+            ? '0 4px 15px rgba(102, 126, 234, 0.4), 0 2px 4px rgba(0,0,0,0.1)' 
+            : '0 4px 15px rgba(245, 87, 108, 0.4), 0 2px 4px rgba(0,0,0,0.1)'
+        }"
       >
-        {{ showSessionList ? '隐藏' : '会话' }}
+        <template #icon>
+          <span v-if="showSessionList" style="margin-right: 4px;">📋</span>
+          <span v-else style="margin-right: 4px;">📚</span>
+        </template>
+        {{ showSessionList ? '隐藏' : '历史记录' }}
       </a-button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { message } from 'ant-design-vue';
 import { aiChatApi, type AiChatSession, type AiChatMessage } from '../api/ai-chat';
 import store from '../store';
@@ -154,16 +227,97 @@ function createNewSession() {
   showSessionList.value = false;
 }
 
+// 按钮悬停效果
+function handleButtonHover(e: MouseEvent) {
+  const target = e.target as HTMLElement;
+  if (showSessionList.value) {
+    target.style.background = 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)';
+    target.style.transform = 'translateY(-2px)';
+    target.style.boxShadow = '0 8px 25px rgba(102, 126, 234, 0.6), 0 6px 12px rgba(0,0,0,0.2)';
+  } else {
+    target.style.background = 'linear-gradient(135deg, #e085f0 0%, #e54b5f 100%)';
+    target.style.transform = 'translateY(-2px)';
+    target.style.boxShadow = '0 8px 25px rgba(245, 87, 108, 0.6), 0 6px 12px rgba(0,0,0,0.2)';
+  }
+}
+
+// 按钮离开效果
+function handleButtonLeave(e: MouseEvent) {
+  const target = e.target as HTMLElement;
+  if (showSessionList.value) {
+    target.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+    target.style.transform = 'translateY(0)';
+    target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.4), 0 2px 4px rgba(0,0,0,0.1)';
+  } else {
+    target.style.background = 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
+    target.style.transform = 'translateY(0)';
+    target.style.boxShadow = '0 4px 15px rgba(245, 87, 108, 0.4), 0 2px 4px rgba(0,0,0,0.1)';
+  }
+}
+
+// 处理输入框输入
+function handleInput(e: Event) {
+  const target = e.target as HTMLInputElement;
+  input.value = target.value;
+  console.log('📝 输入框值更新:', input.value);
+}
+
+// 输入框获得焦点
+function handleInputFocus(e: Event) {
+  const target = e.target as HTMLInputElement;
+  target.style.border = '2px solid #667eea';
+  target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.2), 0 2px 8px rgba(0,0,0,0.05)';
+  target.style.background = '#ffffff';
+}
+
+// 输入框失去焦点
+function handleInputBlur(e: Event) {
+  const target = e.target as HTMLInputElement;
+  target.style.border = '2px solid #e8e8e8';
+  target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
+  target.style.background = '#fafafa';
+}
+
+// 发送按钮悬停效果
+function handleSendButtonHover(e: MouseEvent) {
+  const target = e.target as HTMLElement;
+  if (input.value.trim() && !loading.value) {
+    target.style.background = 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)';
+    target.style.transform = 'translateY(-2px)';
+    target.style.boxShadow = '0 8px 25px rgba(102, 126, 234, 0.6), 0 6px 12px rgba(0,0,0,0.2)';
+  }
+}
+
+// 发送按钮离开效果
+function handleSendButtonLeave(e: MouseEvent) {
+  const target = e.target as HTMLElement;
+  if (input.value.trim() && !loading.value) {
+    target.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+    target.style.transform = 'translateY(0)';
+    target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.4), 0 2px 4px rgba(0,0,0,0.1)';
+  }
+}
+
 // 发送消息
 async function send() {
-  console.log('send函数被调用，input值:', input.value);
-  if (!input.value.trim() || loading.value) {
-    console.log('输入为空或正在加载中，返回');
+  console.log('🚀 send函数被调用，input值:', input.value);
+  console.log('📊 当前状态 - loading:', loading.value, 'input长度:', input.value.length);
+  
+  if (!input.value.trim()) {
+    console.log('❌ 输入为空，返回');
+    message.warning('请输入消息内容');
     return;
   }
   
-  const userMessage = input.value;
+  if (loading.value) {
+    console.log('⏳ 正在加载中，忽略重复请求');
+    return;
+  }
+  
+  const userMessage = input.value.trim();
   input.value = '';
+  
+  console.log('✅ 开始处理消息:', userMessage);
   
   // 添加用户消息到界面
   const userMsg: AiChatMessage = {
@@ -177,7 +331,7 @@ async function send() {
   loading.value = true;
   
   try {
-    console.log('准备调用AI API，参数:', {
+    console.log('🌐 准备调用AI API，参数:', {
       sessionId: currentSessionId.value || undefined,
       message: userMessage,
       userId: userId.value
@@ -191,6 +345,8 @@ async function send() {
       maxTokens: 2048,
       isStream: false
     }, userId.value);
+    
+    console.log('📡 AI API响应:', response);
     
     if (response.data.success) {
       const aiResp = response.data.content;
@@ -212,20 +368,29 @@ async function send() {
       // 刷新会话列表
       await loadSessionList();
       
+      console.log('✅ 消息发送成功');
       message.success('发送成功');
     } else {
+      console.error('❌ AI API返回失败:', response.data.message);
       message.error(response.data.message || '发送失败');
     }
   } catch (error) {
-    console.error('发送消息失败:', error);
+    console.error('💥 发送消息失败:', error);
     message.error('发送失败，请重试');
   } finally {
     loading.value = false;
+    console.log('🏁 发送流程结束');
   }
 }
+
+// 监听输入框值变化
+watch(input, (newValue) => {
+  console.log('👀 输入框值变化:', newValue);
+});
 
 // 组件挂载时加载会话列表
 onMounted(() => {
   loadSessionList();
+  console.log('🎯 组件挂载完成，初始input值:', input.value);
 });
 </script> 

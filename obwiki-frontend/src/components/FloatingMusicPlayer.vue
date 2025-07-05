@@ -324,24 +324,27 @@ function removeMusic(idx: number) {
 }
 
 .floating-button {
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #36d1c4 0%, #5b86e5 100%);
   border-radius: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease;
-  color: white;
-  font-size: 12px;
+  box-shadow: 0 8px 24px rgba(54, 209, 196, 0.25), 0 2px 8px rgba(91, 134, 229, 0.15);
+  transition: all 0.25s cubic-bezier(.4,2,.6,1);
+  color: #fff;
+  font-size: 13px;
+  border: 2px solid #fff;
+  outline: none;
 }
 
 .floating-button:hover {
-  transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  transform: scale(1.13) rotate(-8deg);
+  box-shadow: 0 12px 32px rgba(54, 209, 196, 0.32), 0 4px 16px rgba(91, 134, 229, 0.18);
+  filter: brightness(1.08);
 }
 
 .music-icon {

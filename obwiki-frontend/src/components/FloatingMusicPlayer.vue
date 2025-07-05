@@ -11,19 +11,13 @@
       @click="handleFabClick"
     >
       <span class="fab-wave"></span>
-      <span class="fab-icon">🌊</span>
+      <div class="fab-inner">
+        <span class="fab-icon">🌊</span>
+        <span class="fab-text">音乐</span>
+      </div>
     </div>
-
-    <!-- 海洋主题播放器弹窗 -->
-    <a-modal
-      :visible="showPlayer"
-      title=""
-      @cancel="closePlayer"
-      :footer="null"
-      width="540px"
-      :mask-closable="false"
-      class="ocean-music-modal"
-    >
+    <!-- 自定义弹窗，紧挨按钮右侧展开 -->
+    <div v-if="showPlayer" class="ocean-popup" :style="popupStyle">
       <div class="ocean-modal-bg">
         <div class="ocean-waves">
           <div class="wave wave1"></div>
@@ -37,6 +31,8 @@
         </div>
       </div>
       <div class="ocean-content">
+        <!-- 关闭按钮 -->
+        <button class="ocean-popup-close" @click="closePlayer">✕</button>
         <!-- 标题区 -->
         <div class="ocean-title">
           <span class="ocean-title-icon">🐚</span>
@@ -118,7 +114,7 @@
           controls
         />
       </div>
-    </a-modal>
+    </div>
   </div>
 </template>
 
@@ -318,6 +314,30 @@ function handleFabClick() {
   }
   togglePlayer();
 }
+const popupStyle = computed(() => {
+  // 弹窗右侧展开，距离按钮8px
+  const btnWidth = 68; // ocean-fab宽度
+  const gap = 8;
+  let left = position.value.x + btnWidth + gap;
+  let top = position.value.y;
+  // 防止超出右边界
+  const popupWidth = 480;
+  if (left + popupWidth > window.innerWidth) {
+    left = window.innerWidth - popupWidth - 16;
+  }
+  // 防止超出下边界
+  const popupHeight = 540;
+  if (top + popupHeight > window.innerHeight) {
+    top = window.innerHeight - popupHeight - 16;
+  }
+  if (top < 0) top = 16;
+  return {
+    position: 'fixed' as const,
+    left: left + 'px',
+    top: top + 'px',
+    zIndex: 1100 as const
+  };
+});
 </script>
 
 <style scoped>
@@ -337,6 +357,7 @@ function handleFabClick() {
   border-radius: 50%;
   box-shadow: 0 0 0 6px rgba(54, 209, 196, 0.10), 0 8px 24px rgba(54, 209, 196, 0.18);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
@@ -362,10 +383,65 @@ function handleFabClick() {
   70% { opacity: 0.2; transform: translate(-50%, -50%) scale(1.3); }
   100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
 }
+.fab-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
 .fab-icon {
   font-size: 28px;
   z-index: 1;
   position: relative;
+  margin-bottom: 2px;
+}
+.fab-text {
+  font-size: 12px;
+  color: #e6f7ff;
+  margin-top: 0;
+  display: block;
+  text-align: center;
+  letter-spacing: 2px;
+  font-weight: 600;
+  text-shadow: 0 1px 4px rgba(54,209,196,0.18), 0 0px 2px #223a5f;
+  user-select: none;
+  pointer-events: none;
+}
+.ocean-popup {
+  min-width: 420px;
+  max-width: 520px;
+  min-height: 520px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.13);
+  border-radius: 22px;
+  overflow: visible;
+  background: transparent;
+  border: none;
+  padding: 0;
+  animation: popupFadeIn 0.25s cubic-bezier(.4,2,.6,1);
+}
+@keyframes popupFadeIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.ocean-popup-close {
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  z-index: 2;
+  background: rgba(54,209,196,0.13);
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.ocean-popup-close:hover {
+  background: rgba(255,107,107,0.23);
+  color: #ff6b6b;
 }
 .ocean-music-modal :deep(.ant-modal) {
   background: transparent !important;

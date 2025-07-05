@@ -29,7 +29,8 @@ public class SpringMvcConfig implements WebMvcConfigurer {
                         "/doc/vote/**",
                         "/obwiki/avatar/**",
                        "/content/findContent/**",
-                        "/ebookSnapshot/**"
+                        "/ebookSnapshot/**",
+                        "**"
                 );
         registry.addInterceptor(durationInterceptor)
                 .addPathPatterns("/**");

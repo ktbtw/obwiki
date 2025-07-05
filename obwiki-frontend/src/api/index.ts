@@ -11,7 +11,7 @@ declare global {
 
 const api = axios.create({
   baseURL: "http://127.0.0.1:8880/obwiki", // 使用环境变量设置基础URL
-  timeout: 10000, // 设置请求超时时间为10秒
+  timeout: 60000, // 设置请求超时时间为60秒
 });
 
 // 添加请求拦截器
@@ -22,7 +22,7 @@ const api = axios.create({
 
 api.interceptors.request.use(function (config: any) {
   // 判断是否需要登录
-  if(config.url.includes('/login')||config.url.includes('/save')){
+  if(config.url.includes('/login')||config.url.includes('/save')||config.url.includes('/ai-chat')){
     return config;
   }
     const token = store.state.user.token;

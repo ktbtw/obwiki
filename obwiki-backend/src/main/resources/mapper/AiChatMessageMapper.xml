@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.obwiki.mapper.AiChatMessageMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.example.obwiki.entity.AiChatMessage">
+        <id column="id" property="id" />
+        <result column="session_id" property="sessionId" />
+        <result column="user_id" property="userId" />
+        <result column="role" property="role" />
+        <result column="content" property="content" />
+        <result column="create_time" property="createTime" />
+        <result column="model" property="model" />
+        <result column="temperature" property="temperature" />
+        <result column="max_tokens" property="maxTokens" />
+        <result column="is_stream" property="isStream" />
+        <result column="response_time" property="responseTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, session_id, user_id, role, content, create_time, model, temperature, max_tokens, is_stream, response_time
+    </sql>
+
+</mapper> 

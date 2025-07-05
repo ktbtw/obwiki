@@ -158,7 +158,7 @@ import store from '../store';
 const input = ref('');
 const messages = ref<AiChatMessage[]>([]);
 const sessions = ref<AiChatSession[]>([]);
-const currentSessionId = ref<number | null>(null);
+const currentSessionId = ref<string | null>(null);
 const loading = ref(false);
 const showSessionList = ref(false);
 
@@ -202,20 +202,39 @@ async function loadSessionList() {
 
 // 选择会话
 async function selectSession(session: AiChatSession) {
-  currentSessionId.value = session.id;
-  await loadMessageHistory(session.id);
+  console.log('🎯 选择会话:', session);
+  currentSessionId.value = session.id.toString();
+  await loadMessageHistory(currentSessionId.value);
   showSessionList.value = false;
 }
 
 // 加载消息历史
-async function loadMessageHistory(sessionId: number) {
+async function loadMessageHistory(sessionId: string) {
+  console.log('📚 开始加载消息历史，sessionId:', sessionId, 'userId:', userId.value);
   try {
     const response = await aiChatApi.getMessageHistory(sessionId, userId.value);
+    console.log('📡 消息历史API响应:', response);
+    
     if (response.data.success) {
-      messages.value = response.data.content || [];
+      const messageList = response.data.content || [];
+      console.log('✅ 获取到消息列表:', messageList);
+      console.log('📊 消息数量:', messageList.length);
+      
+      // 确保消息格式正确
+      messages.value = messageList.map((msg: any) => ({
+        id: msg.id,
+        role: msg.role,
+        content: msg.content,
+        createTime: msg.createTime
+      }));
+      
+      console.log('🎉 消息已加载到界面，当前messages:', messages.value);
+    } else {
+      console.error('❌ API返回失败:', response.data.message);
+      message.error(response.data.message || '加载消息历史失败');
     }
   } catch (error) {
-    console.error('加载消息历史失败:', error);
+    console.error('💥 加载消息历史失败:', error);
     message.error('加载消息历史失败');
   }
 }
@@ -352,8 +371,8 @@ async function send() {
       const aiResp = response.data.content;
       
       // 更新会话ID
-      if (!currentSessionId.value) {
-        currentSessionId.value = aiResp.sessionId;
+      if (!currentSessionId.value && aiResp.sessionId) {
+        currentSessionId.value = aiResp.sessionId.toString();
       }
       
       // 添加AI回复
@@ -387,6 +406,12 @@ async function send() {
 watch(input, (newValue) => {
   console.log('👀 输入框值变化:', newValue);
 });
+
+// 监听消息数组变化
+watch(messages, (newMessages) => {
+  console.log('💬 消息数组变化:', newMessages);
+  console.log('📊 消息数量:', newMessages.length);
+}, { deep: true });
 
 // 组件挂载时加载会话列表
 onMounted(() => {

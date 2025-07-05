@@ -43,7 +43,9 @@ export interface AiChatMessage {
 export const aiChatApi = {
   // 发送消息给AI
   chat: (data: AiChatReq, userId: number) => {
-    return api.post('/ai-chat/chat', data, {
+    // 保证data.sessionId为字符串或undefined
+    const sendData = { ...data, sessionId: data.sessionId ? data.sessionId.toString() : undefined };
+    return api.post('/ai-chat/chat', sendData, {
       params: { userId }
     });
   },
@@ -64,7 +66,7 @@ export const aiChatApi = {
   },
 
   // 获取会话消息历史
-  getMessageHistory: (sessionId: number, userId: number) => {
+  getMessageHistory: (sessionId: string, userId: number) => {
     return api.get(`/ai-chat/sessions/${sessionId}/messages`, {
       params: { userId }
     });

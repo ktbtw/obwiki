@@ -3,6 +3,8 @@ package com.example.obwiki.service;
 import com.example.obwiki.rep.AiChatReq;
 import com.example.obwiki.resp.AiChatResp;
 import com.example.obwiki.resp.CommonResp;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
@@ -47,6 +49,7 @@ public interface IAiChatService {
      * 会话响应DTO
      */
     class AiChatSessionResp {
+        @JsonSerialize(using = ToStringSerializer.class)
         private Long id;
         private String title;
         private Date createTime;
@@ -70,6 +73,7 @@ public interface IAiChatService {
      * 消息响应DTO
      */
     class AiChatMessageResp {
+        @JsonSerialize(using = ToStringSerializer.class)
         private Long id;
         private String role;
         private String content;

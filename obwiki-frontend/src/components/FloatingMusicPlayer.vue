@@ -108,8 +108,9 @@
         </div>
         <!-- 隐藏音频播放器 -->
         <audio
+          v-if="currentMusic"
           ref="audioRef"
-          :src="currentMusic ? currentMusic.url : ''"
+          :src="currentMusic.url"
           @ended="next"
           @play="isPlaying = true"
           @pause="isPlaying = false"
@@ -146,6 +147,10 @@ const dragStartPosition = ref<Position>({ x: 0, y: 0 });
 const hasDragged = ref(false);
 const currentMusic = computed(() => playlist.value[currentIndex.value]);
 
+function savePlaylist() {
+  localStorage.setItem('musicPlayerPlaylist', JSON.stringify(playlist.value));
+}
+
 onMounted(() => {
   const savedPosition = localStorage.getItem('musicPlayerPosition');
   if (savedPosition) {
@@ -153,6 +158,15 @@ onMounted(() => {
       position.value = JSON.parse(savedPosition);
     } catch (e) {
       position.value = { x: window.innerWidth - 100, y: window.innerHeight - 100 };
+    }
+  }
+  // 恢复播放列表
+  const savedPlaylist = localStorage.getItem('musicPlayerPlaylist');
+  if (savedPlaylist) {
+    try {
+      playlist.value = JSON.parse(savedPlaylist);
+    } catch (e) {
+      playlist.value = [];
     }
   }
 });
@@ -222,6 +236,7 @@ function closePlayer() {
 function handleLocalUpload(file: File) {
   const url = URL.createObjectURL(file);
   playlist.value.push({ name: file.name, url });
+  savePlaylist();
   if (playlist.value.length === 1) {
     currentIndex.value = 0;
     play();
@@ -232,6 +247,7 @@ function handleLocalUpload(file: File) {
 function addNetworkMusic() {
   if (!musicUrl.value) return;
   playlist.value.push({ name: musicUrl.value.split('/').pop() || '网络音乐', url: musicUrl.value });
+  savePlaylist();
   if (playlist.value.length === 1) {
     currentIndex.value = 0;
     play();
@@ -241,7 +257,14 @@ function addNetworkMusic() {
 }
 function play() {
   if (audioRef.value) {
-    audioRef.value.play();
+    if (audioRef.value.readyState >= 2) {
+      audioRef.value.play();
+    } else {
+      audioRef.value.oncanplay = () => {
+        audioRef.value?.play();
+        audioRef.value!.oncanplay = null;
+      };
+    }
   }
 }
 function pause() {
@@ -277,6 +300,7 @@ function randomPlay() {
 }
 function removeMusic(idx: number) {
   playlist.value.splice(idx, 1);
+  savePlaylist();
   if (currentIndex.value >= playlist.value.length) {
     currentIndex.value = 0;
   }

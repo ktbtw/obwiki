@@ -48,7 +48,10 @@
           </div>
           <div class="ocean-track-info">
             <div class="ocean-track-name">{{ currentMusic.name }}</div>
-            <div class="ocean-track-status">{{ isPlaying ? '正在畅游' : '已暂停' }}</div>
+            <div class="ocean-track-status">
+              <template v-if="isLoading">加载中...</template>
+              <template v-else>{{ isPlaying ? '正在畅游' : '已暂停' }}</template>
+            </div>
             <!-- 播放进度条 -->
             <div class="ocean-progress-bar">
               <span class="ocean-time">{{ formatTime(currentTime) }}</span>
@@ -77,7 +80,9 @@
             <span v-else>▶</span>
           </button>
           <button class="ocean-btn" @click="next" title="下一曲">⏭</button>
-          <button class="ocean-btn" @click="randomPlay" title="随机播放">🔀</button>
+          <button class="ocean-btn shuffle" :class="{ active: isShuffleMode }" @click="toggleShuffleMode" title="随机播放">
+            🔀
+          </button>
         </div>
         <!-- 添加音乐区 -->
         <div class="ocean-add">
@@ -107,7 +112,7 @@
                 :key="index"
                 class="ocean-track-item"
                 :class="{ active: currentIndex === index }"
-                @click="() => { currentIndex = index; play(); }"
+                @click="() => selectTrack(index)"
               >
                 <div class="ocean-track-main">
                   <span class="ocean-track-num">{{ index + 1 }}</span>
@@ -146,6 +151,8 @@
           @pause="isPlaying = false"
           @timeupdate="onTimeUpdate"
           @loadedmetadata="onLoadedMetadata"
+          @loadstart="onAudioLoadStart"
+          @canplay="onAudioCanPlay"
           class="ocean-audio"
           controls
         />
@@ -183,6 +190,9 @@ const editingName = ref('');
 const currentTime = ref(0);
 const duration = ref(0);
 const isSeeking = ref(false);
+const isLoading = ref(false);
+const isShuffleMode = ref(false);
+const shouldAutoPlay = ref(false);
 
 function savePlaylist() {
   localStorage.setItem('musicPlayerPlaylist', JSON.stringify(playlist.value));
@@ -270,14 +280,18 @@ function closePlayer() {
   showPlayer.value = false;
 }
 function handleLocalUpload(file: File) {
-  const url = URL.createObjectURL(file);
-  playlist.value.push({ name: file.name, url });
-  savePlaylist();
-  if (playlist.value.length === 1) {
-    currentIndex.value = 0;
-    play();
-  }
-  message.success('本地音乐添加成功');
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const base64 = e.target?.result as string;
+    playlist.value.push({ name: file.name, url: base64 });
+    savePlaylist();
+    if (playlist.value.length === 1) {
+      currentIndex.value = 0;
+      play();
+    }
+    message.success('本地音乐添加成功');
+  };
+  reader.readAsDataURL(file);
   return false;
 }
 function addNetworkMusic() {
@@ -293,13 +307,13 @@ function addNetworkMusic() {
 }
 function play() {
   if (audioRef.value) {
-    if (audioRef.value.readyState >= 2) {
-      audioRef.value.play();
-    } else {
-      audioRef.value.oncanplay = () => {
-        audioRef.value?.play();
-        audioRef.value!.oncanplay = null;
-      };
+    // 如果是切歌等自动播放，交给canplay事件
+    if (!shouldAutoPlay.value) {
+      if (audioRef.value.readyState >= 2) {
+        audioRef.value.play();
+      } else {
+        shouldAutoPlay.value = true;
+      }
     }
   }
 }
@@ -322,8 +336,16 @@ function prev() {
 }
 function next() {
   if (playlist.value.length === 0) return;
-  currentIndex.value = (currentIndex.value + 1) % playlist.value.length;
-  play();
+  if (isShuffleMode.value) {
+    let idx = Math.floor(Math.random() * playlist.value.length);
+    while (idx === currentIndex.value && playlist.value.length > 1) {
+      idx = Math.floor(Math.random() * playlist.value.length);
+    }
+    currentIndex.value = idx;
+  } else {
+    currentIndex.value = (currentIndex.value + 1) % playlist.value.length;
+  }
+  shouldAutoPlay.value = true;
 }
 function randomPlay() {
   if (playlist.value.length === 0) return;
@@ -428,10 +450,29 @@ function formatTime(sec: number) {
   const s = Math.floor(sec % 60).toString().padStart(2, '0');
   return `${m}:${s}`;
 }
-// 切歌时重置进度
+function onAudioLoadStart() {
+  isLoading.value = true;
+}
+function onAudioCanPlay() {
+  isLoading.value = false;
+  if (shouldAutoPlay.value && audioRef.value) {
+    audioRef.value.play();
+    shouldAutoPlay.value = false;
+  }
+}
+function toggleShuffleMode() {
+  isShuffleMode.value = !isShuffleMode.value;
+  message.success(isShuffleMode.value ? '随机播放模式已开启' : '随机播放模式已关闭');
+}
+function selectTrack(index: number) {
+  currentIndex.value = index;
+  shouldAutoPlay.value = true;
+}
 watch(currentMusic, () => {
+  isLoading.value = true;
   currentTime.value = 0;
   duration.value = 0;
+  isPlaying.value = false;
 });
 </script>
 
@@ -687,6 +728,10 @@ watch(currentMusic, () => {
   font-weight: bold;
   margin-bottom: 4px;
   color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
 }
 .ocean-track-status {
   font-size: 14px;
@@ -728,6 +773,12 @@ watch(currentMusic, () => {
   background: linear-gradient(135deg, #3a8dde 0%, #36d1c4 100%);
   color: #fff;
   transform: scale(1.13);
+}
+.ocean-btn.shuffle.active {
+  background: linear-gradient(135deg, #36d1c4 0%, #3a8dde 100%);
+  color: #fff;
+  box-shadow: 0 0 8px #36d1c4;
+  border: 2px solid #fff;
 }
 .ocean-add {
   display: flex;

@@ -11,7 +11,7 @@ declare global {
 
 const api = axios.create({
   baseURL: "http://127.0.0.1:8880/obwiki", // 使用环境变量设置基础URL
-  timeout: 60000, // 设置请求超时时间为60秒
+  timeout: 600000, // 设置请求超时时间为60秒
 });
 
 // 添加请求拦截器

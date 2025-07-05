@@ -25,6 +25,8 @@
     >
       <AIFloatMenu />
     </a-drawer>
+
+    <FloatingMusicPlayer />
   </a-layout>
 </template>
 
@@ -32,6 +34,7 @@
 import AIFloatMenu from "@/components/AIFloatMenu.vue";
 import TheFooter from "@/components/the-footer.vue";
 import TheHeader from "@/components/the-header.vue";
+import FloatingMusicPlayer from '@/components/FloatingMusicPlayer.vue';
 import { ref } from 'vue';
 const drawerVisible = ref(false);
 </script>

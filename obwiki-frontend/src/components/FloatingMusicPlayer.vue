@@ -1,91 +1,119 @@
 <template>
-  <div 
-    class="floating-music-player"
+  <div
+    class="ocean-floating-player"
     :style="{ left: position.x + 'px', top: position.y + 'px' }"
-    @mousedown="startDrag"
-    @touchstart="startDrag"
   >
-    <!-- 悬浮按钮 -->
-    <div class="floating-button" @click="handleClick">
-      <span class="music-icon">🎵</span>
-      <span class="music-text">音乐</span>
+    <!-- 海洋水滴悬浮按钮 -->
+    <div
+      class="ocean-fab"
+      @mousedown="startDrag"
+      @touchstart="startDrag"
+      @click="handleFabClick"
+    >
+      <span class="fab-wave"></span>
+      <span class="fab-icon">🌊</span>
     </div>
 
-    <!-- 播放器弹窗 -->
+    <!-- 海洋主题播放器弹窗 -->
     <a-modal
       :visible="showPlayer"
-      title="🎵 背景音乐播放器"
+      title=""
       @cancel="closePlayer"
       :footer="null"
-      width="420px"
+      width="540px"
       :mask-closable="false"
+      class="ocean-music-modal"
     >
-      <div class="music-player">
-        <div class="controls">
-          <a-upload
-            :show-upload-list="false"
-            accept="audio/*"
-            :before-upload="handleLocalUpload"
-          >
-            <a-button type="primary" shape="round">本地音乐</a-button>
+      <div class="ocean-modal-bg">
+        <div class="ocean-waves">
+          <div class="wave wave1"></div>
+          <div class="wave wave2"></div>
+          <div class="wave wave3"></div>
+        </div>
+        <div class="ocean-bubbles">
+          <div class="bubble b1"></div>
+          <div class="bubble b2"></div>
+          <div class="bubble b3"></div>
+        </div>
+      </div>
+      <div class="ocean-content">
+        <!-- 标题区 -->
+        <div class="ocean-title">
+          <span class="ocean-title-icon">🐚</span>
+          <span class="ocean-title-text">海洋音乐播放器</span>
+        </div>
+        <!-- 播放信息区 -->
+        <div class="ocean-nowplaying" v-if="currentMusic">
+          <div class="ocean-disc-wrap">
+            <div class="ocean-disc" :class="{ spinning: isPlaying }">
+              <div class="ocean-disc-center"></div>
+              <div class="ocean-disc-wave" v-if="isPlaying"></div>
+            </div>
+          </div>
+          <div class="ocean-track-info">
+            <div class="ocean-track-name">{{ currentMusic.name }}</div>
+            <div class="ocean-track-status">{{ isPlaying ? '正在畅游' : '已暂停' }}</div>
+          </div>
+        </div>
+        <!-- 控制区 -->
+        <div class="ocean-controls">
+          <button class="ocean-btn" @click="prev" title="上一曲">⏮</button>
+          <button class="ocean-btn main" @click="togglePlay" title="播放/暂停">
+            <span v-if="isPlaying">⏸</span>
+            <span v-else>▶</span>
+          </button>
+          <button class="ocean-btn" @click="next" title="下一曲">⏭</button>
+          <button class="ocean-btn" @click="randomPlay" title="随机播放">🔀</button>
+        </div>
+        <!-- 添加音乐区 -->
+        <div class="ocean-add">
+          <a-upload :show-upload-list="false" accept="audio/*" :before-upload="handleLocalUpload">
+            <button class="ocean-add-btn">
+              <span>📁 本地</span>
+            </button>
           </a-upload>
-          <a-input-search
-            v-model="musicUrl"
-            placeholder="输入网络音乐URL"
-            enter-button="添加"
-            @search="addNetworkMusic"
-            style="width: 220px; margin-left: 10px;"
-          />
+          <div class="ocean-url-group">
+            <input v-model="musicUrl" placeholder="输入音乐URL..." class="ocean-url-input" @keyup.enter="addNetworkMusic" />
+            <button class="ocean-add-btn" @click="addNetworkMusic" title="添加网络音乐">🔗</button>
+          </div>
         </div>
-        <div class="playlist">
-          <div class="playlist-title">播放列表</div>
-          <a-list
-            bordered
-            :data-source="playlist"
-            style="max-height: 120px; overflow-y: auto;"
-          >
-            <template #renderItem="{ item, index }">
-              <a-list-item>
-                <span style="flex:1;">{{ item.name }}</span>
-                <a @click="() => { currentIndex = index; play(); }" style="margin-right:8px;">播放</a>
-                <a @click="() => removeMusic(index)" style="color:red;">删除</a>
-              </a-list-item>
-            </template>
-          </a-list>
+        <!-- 播放列表区 -->
+        <div class="ocean-playlist">
+          <div class="ocean-playlist-title">
+            <span>🎶 播放列表</span>
+            <span class="ocean-count">({{ playlist.length }})</span>
+          </div>
+          <div class="ocean-list">
+            <div v-if="playlist.length === 0" class="ocean-empty">
+              <span>🌊 暂无音乐，快来添加吧！</span>
+            </div>
+            <div v-else>
+              <div
+                v-for="(item, index) in playlist"
+                :key="index"
+                class="ocean-track-item"
+                :class="{ active: currentIndex === index }"
+              >
+                <div class="ocean-track-main">
+                  <span class="ocean-track-num">{{ index + 1 }}</span>
+                  <span class="ocean-track-title">{{ item.name }}</span>
+                </div>
+                <div class="ocean-track-actions">
+                  <button class="ocean-track-btn" @click="() => { currentIndex = index; play(); }">▶</button>
+                  <button class="ocean-track-btn del" @click="() => removeMusic(index)">✕</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="audio-controls">
-          <a-button shape="circle" @click="prev">
-            <template #icon>
-              <span>&lt;</span>
-            </template>
-          </a-button>
-          <a-button shape="circle" @click="togglePlay" style="margin: 0 10px;">
-            <template #icon>
-              <span v-if="isPlaying">⏸️</span>
-              <span v-else>▶️</span>
-            </template>
-          </a-button>
-          <a-button shape="circle" @click="next">
-            <template #icon>
-              <span>&gt;</span>
-            </template>
-          </a-button>
-          <a-button shape="circle" @click="randomPlay" style="margin-left: 10px;">
-            <template #icon>
-              <span>🔀</span>
-            </template>
-          </a-button>
-        </div>
-        <div class="current-title" v-if="currentMusic">
-          正在播放：{{ currentMusic.name }}
-        </div>
+        <!-- 隐藏音频播放器 -->
         <audio
           ref="audioRef"
           :src="currentMusic ? currentMusic.url : ''"
           @ended="next"
           @play="isPlaying = true"
           @pause="isPlaying = false"
-          style="width: 100%; margin-top: 10px;"
+          class="ocean-audio"
           controls
         />
       </div>
@@ -101,139 +129,96 @@ interface MusicItem {
   name: string;
   url: string;
 }
-
 interface Position {
   x: number;
   y: number;
 }
-
 const showPlayer = ref(false);
 const playlist = ref<MusicItem[]>([]);
 const currentIndex = ref(0);
 const isPlaying = ref(false);
 const musicUrl = ref('');
 const audioRef = ref<HTMLAudioElement | null>(null);
-
-// 拖拽相关状态
 const position = ref<Position>({ x: window.innerWidth - 100, y: window.innerHeight - 100 });
 const isDragging = ref(false);
 const dragOffset = ref<Position>({ x: 0, y: 0 });
 const dragStartPosition = ref<Position>({ x: 0, y: 0 });
 const hasDragged = ref(false);
-
 const currentMusic = computed(() => playlist.value[currentIndex.value]);
 
-// 初始化位置
 onMounted(() => {
-  // 从 localStorage 恢复位置
   const savedPosition = localStorage.getItem('musicPlayerPosition');
   if (savedPosition) {
     try {
       position.value = JSON.parse(savedPosition);
     } catch (e) {
-      // 如果解析失败，使用默认位置
       position.value = { x: window.innerWidth - 100, y: window.innerHeight - 100 };
     }
   }
 });
-
-// 保存位置到 localStorage
 function savePosition() {
   localStorage.setItem('musicPlayerPosition', JSON.stringify(position.value));
 }
-
-// 开始拖拽
 function startDrag(event: MouseEvent | TouchEvent) {
-  if (showPlayer.value) return; // 播放器打开时不允许拖拽
-  
+  if (showPlayer.value) return;
   isDragging.value = true;
   hasDragged.value = false;
   const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX;
   const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
-  
   dragStartPosition.value = { x: clientX, y: clientY };
   dragOffset.value = {
     x: clientX - position.value.x,
     y: clientY - position.value.y
   };
-  
   document.addEventListener('mousemove', onDrag);
   document.addEventListener('touchmove', onDrag);
   document.addEventListener('mouseup', stopDrag);
   document.addEventListener('touchend', stopDrag);
-  
   event.preventDefault();
 }
-
-// 拖拽中
 function onDrag(event: MouseEvent | TouchEvent) {
   if (!isDragging.value) return;
-  
   const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX;
   const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
-  
-  // 检查拖拽距离，如果超过阈值则标记为已拖拽
   const dragDistance = Math.sqrt(
-    Math.pow(clientX - dragStartPosition.value.x, 2) + 
+    Math.pow(clientX - dragStartPosition.value.x, 2) +
     Math.pow(clientY - dragStartPosition.value.y, 2)
   );
-  if (dragDistance > 5) { // 5px 的拖拽阈值
+  if (dragDistance > 5) {
     hasDragged.value = true;
   }
-  
   const newX = clientX - dragOffset.value.x;
   const newY = clientY - dragOffset.value.y;
-  
-  // 限制在屏幕范围内
   const maxX = window.innerWidth - 60;
   const maxY = window.innerHeight - 60;
-  
   position.value = {
     x: Math.max(0, Math.min(newX, maxX)),
     y: Math.max(0, Math.min(newY, maxY))
   };
-  
   event.preventDefault();
 }
-
-// 停止拖拽
 function stopDrag() {
   if (isDragging.value) {
     isDragging.value = false;
     savePosition();
   }
-  
   document.removeEventListener('mousemove', onDrag);
   document.removeEventListener('touchmove', onDrag);
   document.removeEventListener('mouseup', stopDrag);
   document.removeEventListener('touchend', stopDrag);
 }
-
-// 清理事件监听器
 onUnmounted(() => {
   document.removeEventListener('mousemove', onDrag);
   document.removeEventListener('touchmove', onDrag);
   document.removeEventListener('mouseup', stopDrag);
   document.removeEventListener('touchend', stopDrag);
 });
-
-// 处理点击事件
-function handleClick(event: MouseEvent) {
-  // 如果正在拖拽或已经拖拽过，不触发点击事件
-  if (isDragging.value || hasDragged.value) {
-    return;
-  }
-  togglePlayer();
-}
-
 function togglePlayer() {
   showPlayer.value = !showPlayer.value;
 }
-
 function closePlayer() {
   showPlayer.value = false;
 }
-
 function handleLocalUpload(file: File) {
   const url = URL.createObjectURL(file);
   playlist.value.push({ name: file.name, url });
@@ -244,7 +229,6 @@ function handleLocalUpload(file: File) {
   message.success('本地音乐添加成功');
   return false;
 }
-
 function addNetworkMusic() {
   if (!musicUrl.value) return;
   playlist.value.push({ name: musicUrl.value.split('/').pop() || '网络音乐', url: musicUrl.value });
@@ -255,19 +239,16 @@ function addNetworkMusic() {
   musicUrl.value = '';
   message.success('网络音乐添加成功');
 }
-
 function play() {
   if (audioRef.value) {
     audioRef.value.play();
   }
 }
-
 function pause() {
   if (audioRef.value) {
     audioRef.value.pause();
   }
 }
-
 function togglePlay() {
   if (isPlaying.value) {
     pause();
@@ -275,19 +256,16 @@ function togglePlay() {
     play();
   }
 }
-
 function prev() {
   if (playlist.value.length === 0) return;
   currentIndex.value = (currentIndex.value - 1 + playlist.value.length) % playlist.value.length;
   play();
 }
-
 function next() {
   if (playlist.value.length === 0) return;
   currentIndex.value = (currentIndex.value + 1) % playlist.value.length;
   play();
 }
-
 function randomPlay() {
   if (playlist.value.length === 0) return;
   let idx = Math.floor(Math.random() * playlist.value.length);
@@ -297,7 +275,6 @@ function randomPlay() {
   currentIndex.value = idx;
   play();
 }
-
 function removeMusic(idx: number) {
   playlist.value.splice(idx, 1);
   if (currentIndex.value >= playlist.value.length) {
@@ -309,83 +286,403 @@ function removeMusic(idx: number) {
     play();
   }
 }
+function handleFabClick() {
+  // 如果正在拖拽或刚刚拖拽过，不触发点击
+  if (isDragging.value || hasDragged.value) {
+    hasDragged.value = false; // 重置
+    return;
+  }
+  togglePlayer();
+}
 </script>
 
 <style scoped>
-.floating-music-player {
+.ocean-floating-player {
   position: fixed;
   z-index: 1000;
   user-select: none;
   cursor: grab;
 }
-
-.floating-music-player:active {
+.ocean-floating-player:active {
   cursor: grabbing;
 }
-
-.floating-button {
+.ocean-fab {
+  width: 68px;
+  height: 68px;
+  background: linear-gradient(135deg, #3a8dde 0%, #36d1c4 100%);
+  border-radius: 50%;
+  box-shadow: 0 0 0 6px rgba(54, 209, 196, 0.10), 0 8px 24px rgba(54, 209, 196, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(.4,2,.6,1);
+  border: 2.5px solid #36d1c4;
+  overflow: visible;
+}
+.fab-wave {
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(54,209,196,0.18) 60%, transparent 100%);
+  animation: fabWave 2.5s infinite linear;
+  z-index: 0;
+}
+@keyframes fabWave {
+  0% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+  70% { opacity: 0.2; transform: translate(-50%, -50%) scale(1.3); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
+}
+.fab-icon {
+  font-size: 28px;
+  z-index: 1;
+  position: relative;
+}
+.ocean-music-modal :deep(.ant-modal) {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.ocean-music-modal :deep(.ant-modal-content) {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #fff;
+}
+.ocean-music-modal :deep(.ant-modal-body) {
+  background: transparent !important;
+  padding: 0 !important;
+}
+.ocean-modal-bg {
+  position: absolute;
+  left: 0; right: 0; top: 0; bottom: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.ocean-waves {
+  position: absolute;
+  left: 0; right: 0; top: 0; height: 90px;
+  overflow: hidden;
+}
+.wave {
+  position: absolute;
+  width: 200%;
+  height: 100px;
+  left: -50%;
+  background: rgba(54,209,196,0.18);
+  border-radius: 43% 57% 60% 40% / 60% 40% 60% 40%;
+  opacity: 0.7;
+  animation: oceanWave 8s linear infinite;
+}
+.wave1 { top: 0; animation-delay: 0s; }
+.wave2 { top: 20px; opacity: 0.5; animation-delay: 2s; }
+.wave3 { top: 40px; opacity: 0.3; animation-delay: 4s; }
+@keyframes oceanWave {
+  0% { left: -50%; }
+  100% { left: 0%; }
+}
+.ocean-bubbles {
+  position: absolute;
+  left: 0; right: 0; bottom: 0; height: 100%;
+  pointer-events: none;
+}
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.13);
+  animation: bubbleFloat 6s ease-in-out infinite;
+}
+.b1 { width: 36px; height: 36px; left: 10%; bottom: 20%; animation-delay: 0s; }
+.b2 { width: 22px; height: 22px; left: 70%; bottom: 10%; animation-delay: 2s; }
+.b3 { width: 28px; height: 28px; left: 40%; bottom: 30%; animation-delay: 4s; }
+@keyframes bubbleFloat {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-30px); }
+}
+.ocean-content {
+  position: relative;
+  z-index: 1;
+  padding: 40px 30px 30px 30px;
+  background: linear-gradient(135deg, #223a5f 60%, #36d1c4 100%);
+  border-radius: 22px;
+  min-height: 520px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.13);
+  border: 2.5px solid #36d1c4;
+  overflow: hidden;
+}
+.ocean-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 22px;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 18px;
+  letter-spacing: 2px;
+}
+.ocean-title-icon {
+  font-size: 26px;
+}
+.ocean-nowplaying {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  margin-bottom: 28px;
+  padding: 18px 22px;
+  background: rgba(54,209,196,0.10);
+  border-radius: 16px;
+  border: 1.5px solid rgba(54,209,196,0.22);
+  box-shadow: 0 2px 8px rgba(54,209,196,0.08);
+}
+.ocean-disc-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ocean-disc {
   width: 64px;
   height: 64px;
-  background: linear-gradient(135deg, #36d1c4 0%, #5b86e5 100%);
   border-radius: 50%;
+  background: linear-gradient(45deg, #2b5876, #4e4376);
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 8px 24px rgba(54, 209, 196, 0.25), 0 2px 8px rgba(91, 134, 229, 0.15);
-  transition: all 0.25s cubic-bezier(.4,2,.6,1);
-  color: #fff;
-  font-size: 13px;
-  border: 2px solid #fff;
-  outline: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.23);
+  position: relative;
+  transition: all 0.3s ease;
 }
-
-.floating-button:hover {
-  transform: scale(1.13) rotate(-8deg);
-  box-shadow: 0 12px 32px rgba(54, 209, 196, 0.32), 0 4px 16px rgba(91, 134, 229, 0.18);
-  filter: brightness(1.08);
+.ocean-disc.spinning {
+  animation: spin 2.2s linear infinite;
 }
-
-.music-icon {
-  font-size: 20px;
-  margin-bottom: 2px;
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
-
-.music-text {
-  font-size: 10px;
+.ocean-disc-center {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 8px #36d1c4, inset 0 2px 4px rgba(0,0,0,0.23);
 }
-
-.music-player {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.ocean-disc-wave {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 80px; height: 80px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(54,209,196,0.18) 60%, transparent 100%);
+  animation: discWave 1.8s infinite linear;
+  z-index: 0;
 }
-
-.controls {
-  display: flex;
-  margin-bottom: 10px;
+@keyframes discWave {
+  0% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+  70% { opacity: 0.2; transform: translate(-50%, -50%) scale(1.2); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); }
 }
-
-.playlist {
-  width: 100%;
-  margin-bottom: 10px;
+.ocean-track-info {
+  flex: 1;
 }
-
-.playlist-title {
+.ocean-track-name {
+  font-size: 18px;
   font-weight: bold;
   margin-bottom: 4px;
+  color: #fff;
 }
-
-.audio-controls {
+.ocean-track-status {
+  font-size: 14px;
+  opacity: 0.85;
+  color: #b2f0f7;
+}
+.ocean-controls {
   display: flex;
   justify-content: center;
-  margin-bottom: 8px;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 28px;
 }
-
-.current-title {
-  margin-bottom: 4px;
-  color: #1890ff;
-  font-size: 14px;
+.ocean-btn {
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.10);
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(54,209,196,0.08);
+}
+.ocean-btn:hover {
+  background: rgba(54,209,196,0.18);
+  color: #36d1c4;
+  transform: scale(1.08);
+}
+.ocean-btn.main {
+  width: 68px;
+  height: 68px;
+  background: linear-gradient(135deg, #36d1c4 0%, #3a8dde 100%);
+  font-size: 28px;
+  box-shadow: 0 8px 20px rgba(54,209,196,0.18);
+}
+.ocean-btn.main:hover {
+  background: linear-gradient(135deg, #3a8dde 0%, #36d1c4 100%);
+  color: #fff;
+  transform: scale(1.13);
+}
+.ocean-add {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 22px;
+}
+.ocean-add-btn {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 22px;
+  background: rgba(255,255,255,0.10);
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(54,209,196,0.08);
+}
+.ocean-add-btn:hover {
+  background: rgba(54,209,196,0.18);
+  color: #36d1c4;
+}
+.ocean-url-group {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+}
+.ocean-url-input {
+  flex: 1;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 22px;
+  background: rgba(255,255,255,0.10);
+  color: #fff;
+  font-size: 15px;
+  outline: none;
+  transition: background 0.2s;
+}
+.ocean-url-input::placeholder {
+  color: #b2f0f7;
+}
+.ocean-url-input:focus {
+  background: rgba(255,255,255,0.18);
+}
+.ocean-playlist {
+  margin-bottom: 10px;
+}
+.ocean-playlist-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #b2f0f7;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ocean-count {
+  font-size: 13px;
+  opacity: 0.7;
+}
+.ocean-list {
+  max-height: 180px;
+  overflow-y: auto;
+  border-radius: 12px;
+  background: rgba(54,209,196,0.07);
+  border: 1.5px solid rgba(54,209,196,0.13);
+  box-shadow: 0 2px 8px rgba(54,209,196,0.08);
+}
+.ocean-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 38px 0;
+  color: #b2f0f7;
+  font-size: 15px;
+}
+.ocean-track-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  transition: all 0.2s;
+  background: transparent;
+}
+.ocean-track-item.active {
+  background: rgba(54,209,196,0.13);
+  border-left: 3px solid #36d1c4;
+}
+.ocean-track-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ocean-track-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  color: #36d1c4;
+}
+.ocean-track-title {
+  font-size: 15px;
+  color: #fff;
+  font-weight: 500;
+}
+.ocean-track-actions {
+  display: flex;
+  gap: 6px;
+}
+.ocean-track-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.10);
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+.ocean-track-btn:hover {
+  background: rgba(54,209,196,0.18);
+  color: #36d1c4;
+}
+.ocean-track-btn.del:hover {
+  background: rgba(255,107,107,0.23);
+  color: #ff6b6b;
+}
+.ocean-audio {
+  display: none;
+}
+.ocean-list::-webkit-scrollbar {
+  width: 6px;
+}
+.ocean-list::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.05);
+  border-radius: 3px;
+}
+.ocean-list::-webkit-scrollbar-thumb {
+  background: rgba(54,209,196,0.23);
+  border-radius: 3px;
+}
+.ocean-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(54,209,196,0.38);
 }
 </style> 

@@ -49,6 +49,24 @@
           <div class="ocean-track-info">
             <div class="ocean-track-name">{{ currentMusic.name }}</div>
             <div class="ocean-track-status">{{ isPlaying ? '正在畅游' : '已暂停' }}</div>
+            <!-- 播放进度条 -->
+            <div class="ocean-progress-bar">
+              <span class="ocean-time">{{ formatTime(currentTime) }}</span>
+              <input
+                type="range"
+                min="0"
+                :max="duration"
+                step="0.1"
+                :value="currentTime"
+                @mousedown="onSeekStart"
+                @touchstart="onSeekStart"
+                @input="onSeekInput"
+                @change="onSeekEnd"
+                class="progress-range"
+                :disabled="!duration"
+              />
+              <span class="ocean-time">{{ formatTime(duration) }}</span>
+            </div>
           </div>
         </div>
         <!-- 控制区 -->
@@ -89,14 +107,30 @@
                 :key="index"
                 class="ocean-track-item"
                 :class="{ active: currentIndex === index }"
+                @click="() => { currentIndex = index; play(); }"
               >
                 <div class="ocean-track-main">
                   <span class="ocean-track-num">{{ index + 1 }}</span>
-                  <span class="ocean-track-title">{{ item.name }}</span>
+                  <span class="ocean-track-title">
+                    <template v-if="editingIndex === index">
+                      <input
+                        :id="'edit-music-name-' + index"
+                        v-model="editingName"
+                        class="edit-music-input"
+                        @keyup.enter="saveEditName(index)"
+                        @blur="saveEditName(index)"
+                        @keyup.esc="cancelEditName"
+                        maxlength="40"
+                      />
+                    </template>
+                    <template v-else>
+                      {{ item.name }}
+                    </template>
+                  </span>
+                  <button class="ocean-track-btn edit" @click.stop="startEditName(index)" v-if="editingIndex !== index" title="重命名">✏️</button>
                 </div>
                 <div class="ocean-track-actions">
-                  <button class="ocean-track-btn" @click="() => { currentIndex = index; play(); }">▶</button>
-                  <button class="ocean-track-btn del" @click="() => removeMusic(index)">✕</button>
+                  <button class="ocean-track-btn del" @click.stop="() => removeMusic(index)">✕</button>
                 </div>
               </div>
             </div>
@@ -110,6 +144,8 @@
           @ended="next"
           @play="isPlaying = true"
           @pause="isPlaying = false"
+          @timeupdate="onTimeUpdate"
+          @loadedmetadata="onLoadedMetadata"
           class="ocean-audio"
           controls
         />
@@ -119,7 +155,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { message } from 'ant-design-vue';
 
 interface MusicItem {
@@ -142,6 +178,11 @@ const dragOffset = ref<Position>({ x: 0, y: 0 });
 const dragStartPosition = ref<Position>({ x: 0, y: 0 });
 const hasDragged = ref(false);
 const currentMusic = computed(() => playlist.value[currentIndex.value]);
+const editingIndex = ref(-1);
+const editingName = ref('');
+const currentTime = ref(0);
+const duration = ref(0);
+const isSeeking = ref(false);
 
 function savePlaylist() {
   localStorage.setItem('musicPlayerPlaylist', JSON.stringify(playlist.value));
@@ -170,7 +211,6 @@ function savePosition() {
   localStorage.setItem('musicPlayerPosition', JSON.stringify(position.value));
 }
 function startDrag(event: MouseEvent | TouchEvent) {
-  if (showPlayer.value) return;
   isDragging.value = true;
   hasDragged.value = false;
   const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX;
@@ -314,6 +354,26 @@ function handleFabClick() {
   }
   togglePlayer();
 }
+function startEditName(idx: number) {
+  editingIndex.value = idx;
+  editingName.value = playlist.value[idx].name;
+  // 等待下一个tick后聚焦输入框
+  setTimeout(() => {
+    const input = document.getElementById('edit-music-name-' + idx) as HTMLInputElement;
+    if (input) input.focus();
+  }, 0);
+}
+function saveEditName(idx: number) {
+  if (editingName.value.trim() !== '') {
+    playlist.value[idx].name = editingName.value.trim();
+    savePlaylist();
+    message.success('重命名成功');
+  }
+  editingIndex.value = -1;
+}
+function cancelEditName() {
+  editingIndex.value = -1;
+}
 const popupStyle = computed(() => {
   // 弹窗右侧展开，距离按钮8px
   const btnWidth = 68; // ocean-fab宽度
@@ -337,6 +397,41 @@ const popupStyle = computed(() => {
     top: top + 'px',
     zIndex: 1100 as const
   };
+});
+function onTimeUpdate() {
+  if (!isSeeking.value && audioRef.value) {
+    currentTime.value = audioRef.value.currentTime;
+  }
+}
+function onLoadedMetadata() {
+  if (audioRef.value) {
+    duration.value = audioRef.value.duration;
+  }
+}
+function onSeekStart() {
+  isSeeking.value = true;
+}
+function onSeekEnd(e: Event) {
+  if (audioRef.value) {
+    const value = Number((e.target as HTMLInputElement).value);
+    audioRef.value.currentTime = value;
+    currentTime.value = value;
+  }
+  isSeeking.value = false;
+}
+function onSeekInput(e: Event) {
+  currentTime.value = Number((e.target as HTMLInputElement).value);
+}
+function formatTime(sec: number) {
+  if (isNaN(sec)) return '00:00';
+  const m = Math.floor(sec / 60).toString().padStart(2, '0');
+  const s = Math.floor(sec % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}
+// 切歌时重置进度
+watch(currentMusic, () => {
+  currentTime.value = 0;
+  duration.value = 0;
 });
 </script>
 
@@ -718,10 +813,14 @@ const popupStyle = computed(() => {
   margin-bottom: 6px;
   transition: all 0.2s;
   background: transparent;
+  cursor: pointer;
 }
 .ocean-track-item.active {
   background: rgba(54,209,196,0.13);
   border-left: 3px solid #36d1c4;
+}
+.ocean-track-item:hover {
+  background: rgba(54,209,196,0.10);
 }
 .ocean-track-main {
   display: flex;
@@ -744,6 +843,11 @@ const popupStyle = computed(() => {
   font-size: 15px;
   color: #fff;
   font-weight: 500;
+  white-space: normal;
+  word-break: break-all;
+  max-width: 180px;
+  line-height: 1.4;
+  display: block;
 }
 .ocean-track-actions {
   display: flex;
@@ -768,6 +872,16 @@ const popupStyle = computed(() => {
   background: rgba(255,107,107,0.23);
   color: #ff6b6b;
 }
+.ocean-track-btn.edit {
+  background: rgba(54,209,196,0.10);
+  color: #36d1c4;
+  font-size: 14px;
+  margin-left: 6px;
+}
+.ocean-track-btn.edit:hover {
+  background: rgba(54,209,196,0.18);
+  color: #223a5f;
+}
 .ocean-audio {
   display: none;
 }
@@ -784,5 +898,109 @@ const popupStyle = computed(() => {
 }
 .ocean-list::-webkit-scrollbar-thumb:hover {
   background: rgba(54,209,196,0.38);
+}
+.edit-music-input {
+  width: 180px;
+  font-size: 15px;
+  border: 1.5px solid #36d1c4;
+  border-radius: 6px;
+  padding: 2px 8px;
+  outline: none;
+  color: #223a5f;
+  background: #e6f7ff;
+  margin-right: 4px;
+  white-space: normal;
+  word-break: break-all;
+  line-height: 1.4;
+  max-width: 100%;
+}
+.ocean-progress-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 2px;
+  height: 24px;
+}
+.ocean-time {
+  font-size: 12px;
+  color: #b2f0f7;
+  min-width: 38px;
+  text-align: center;
+  font-family: monospace;
+}
+.progress-range {
+  flex: 1;
+  height: 4px;
+  background: linear-gradient(90deg, #36d1c4 0%, #3a8dde 100%);
+  border-radius: 2px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.progress-range:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.progress-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #36d1c4;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(54,209,196,0.18);
+  transition: background 0.2s;
+  margin-top: -5px;
+}
+.progress-range:active::-webkit-slider-thumb {
+  background: #3a8dde;
+}
+.progress-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #36d1c4;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(54,209,196,0.18);
+  transition: background 0.2s;
+}
+.progress-range:active::-moz-range-thumb {
+  background: #3a8dde;
+}
+.progress-range::-ms-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #36d1c4;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(54,209,196,0.18);
+  transition: background 0.2s;
+}
+.progress-range:active::-ms-thumb {
+  background: #3a8dde;
+}
+.progress-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #36d1c4 0%, #3a8dde 100%);
+}
+.progress-range::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #36d1c4 0%, #3a8dde 100%);
+}
+.progress-range::-ms-fill-lower {
+  background: #36d1c4;
+}
+.progress-range::-ms-fill-upper {
+  background: #3a8dde;
 }
 </style> 

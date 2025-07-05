@@ -43,6 +43,8 @@ api.interceptors.request.use(function (config: any) {
   if (token) {
     config.headers.token = token;
   }
+  // 统一加上utf-8编码
+  config.headers['Content-Type'] = 'application/json; charset=utf-8';
   return config;
 }, error => {
   return Promise.reject(error);

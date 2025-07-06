@@ -102,6 +102,8 @@
       title="发布新帖子"
       :confirm-loading="modalLoading"
       @ok="handleOk"
+      @cancel="handleCancel"
+      destroyOnClose
       width="700px"
     >
       <a-form :model="newPost" layout="vertical">
@@ -247,6 +249,15 @@ export default defineComponent({
       }
     };
 
+    const handleCancel = () => {
+      modalVisible.value = false;
+      newPost.value = {
+        title: '',
+        content: '',
+        userId: user.value?.id,
+      };
+    };
+
     const goToComment = (postId: number) => {
       router.push({ path: `/post/${postId}`, query: { scrollTo: 'comment' } });
     };
@@ -336,6 +347,7 @@ export default defineComponent({
       loadPosts,
       showModal,
       handleOk,
+      handleCancel,
       goToComment,
       getImageUrl,
       handleDeletePost,

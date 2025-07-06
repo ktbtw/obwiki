@@ -6,7 +6,10 @@
           <div class="left">
             <h2 class="page-title">社区讨论</h2>
             <div class="filters">
-              <a-radio-group v-model="currentFilter" button-style="solid">
+              <div style="margin-bottom: 8px; color: #666; font-size: 12px;">
+                当前排序: {{ currentFilter === 'latest' ? '最新发布' : currentFilter === 'hot' ? '最热门' : '最多浏览' }}
+              </div>
+              <a-radio-group v-model="currentFilter" button-style="solid" @change="handleFilterChange">
                 <a-radio-button value="latest">最新发布</a-radio-button>
                 <a-radio-button value="hot">最热门</a-radio-button>
                 <a-radio-button value="most-viewed">最多浏览</a-radio-button>
@@ -196,17 +199,8 @@ export default defineComponent({
         const res = await getPostList();
         posts.value = res.data;
         
-        // 根据筛选条件排序
-        switch (currentFilter.value) {
-          case 'hot':
-            posts.value.sort((a, b) => (b.voteCount || 0) - (a.voteCount || 0));
-            break;
-          case 'most-viewed':
-            posts.value.sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
-            break;
-          default:
-            posts.value.sort((a, b) => new Date(b.createTime).getTime() - new Date(a.createTime).getTime());
-        }
+        // 根据当前筛选条件排序
+        sortPosts();
       } catch (error) {
         message.error('加载文章列表失败');
       } finally {
@@ -214,10 +208,38 @@ export default defineComponent({
       }
     };
 
-    // 监听筛选条件变化
-    watch(currentFilter, () => {
-      loadPosts();
+    // 前端排序函数
+    const sortPosts = () => {
+      console.log('🔄 开始排序，当前筛选条件:', currentFilter.value);
+      const postsCopy = [...posts.value];
+      switch (currentFilter.value) {
+        case 'hot':
+          postsCopy.sort((a, b) => (b.voteCount || 0) - (a.voteCount || 0));
+          console.log('🔥 按热度排序完成');
+          break;
+        case 'most-viewed':
+          postsCopy.sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
+          console.log('👁️ 按浏览量排序完成');
+          break;
+        default:
+          postsCopy.sort((a, b) => new Date(b.createTime).getTime() - new Date(a.createTime).getTime());
+          console.log('📅 按时间排序完成');
+      }
+      posts.value = postsCopy;
+      console.log('✅ 排序完成，文章数量:', posts.value.length);
+    };
+
+    // 监听筛选条件变化 - 只进行前端排序，不重新请求数据
+    watch(currentFilter, (newValue, oldValue) => {
+      console.log('🎯 筛选条件变化:', oldValue, '->', newValue);
+      sortPosts();
     });
+
+    // 处理筛选条件变化
+    const handleFilterChange = (e: any) => {
+      console.log('🎯 点击筛选按钮:', e.target.value);
+      currentFilter.value = e.target.value;
+    };
 
     const showModal = () => {
       newPost.value = {
@@ -296,8 +318,8 @@ export default defineComponent({
           console.log('WebSocket连接成功');
           reconnectAttempts = 0;
         };
-        websocket.onmessage = () => {
-          loadPosts();
+        websocket.onmessage = async () => {
+          await loadPosts();
         };
         websocket.onerror = () => {
           console.log('WebSocket连接错误');
@@ -351,6 +373,7 @@ export default defineComponent({
       goToComment,
       getImageUrl,
       handleDeletePost,
+      handleFilterChange,
       user,
       currentUserId
     };

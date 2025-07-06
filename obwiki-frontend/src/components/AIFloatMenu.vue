@@ -1,150 +1,97 @@
 <template>
-  <div style="display: flex; flex-direction: column; height: 100%;">
+  <div class="ai-chat-wrapper">
     <!-- 会话列表 -->
-    <div v-if="showSessionList" style="margin-bottom: 12px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <span style="font-weight: bold;">会话列表</span>
-        <a-button size="small" @click="createNewSession">新建会话</a-button>
+    <div v-if="showSessionList" class="session-list-container">
+      <div class="session-header">
+        <span class="session-title">📚 会话列表</span>
+        <button class="new-session-btn" @click="createNewSession">
+          <span>✨</span>
+          <span>新建</span>
+        </button>
       </div>
-      <div style="max-height: 200px; overflow-y: auto;">
+      <div class="session-list">
         <div 
           v-for="session in sessions" 
           :key="session.id" 
-          :style="{
-            padding: '8px 12px',
-            margin: '4px 0',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            background: currentSessionId === session.id ? '#e6f7ff' : '#f5f5f5',
-            border: currentSessionId === session.id ? '1px solid #1890ff' : '1px solid #d9d9d9'
-          }"
+          class="session-item"
+          :class="{ active: currentSessionId === session.id.toString() }"
           @click="selectSession(session)"
         >
-          <div style="font-weight: 500; margin-bottom: 4px;">{{ session.title || '新对话' }}</div>
-          <div style="font-size: 12px; color: #666;">
-            {{ formatTime(session.updateTime) }} · {{ session.messageCount }}条消息
+          <div class="session-info">
+            <div class="session-name">{{ session.title || '新对话' }}</div>
+            <div class="session-meta">
+              <span class="session-time">{{ formatTime(session.updateTime) }}</span>
+              <span class="session-count">{{ session.messageCount }}条消息</span>
+            </div>
           </div>
+          <div class="session-indicator"></div>
         </div>
       </div>
     </div>
 
     <!-- 消息列表 -->
-    <div style="flex: 1; overflow-y: auto; margin-bottom: 12px;">
-      <div v-if="messages.length === 0" style="text-align: center; color: #999; padding: 20px;">
-        开始和AI对话吧！
+    <div class="messages-container">
+      <div v-if="messages.length === 0" class="empty-state">
+        <div class="empty-icon">🤖</div>
+        <div class="empty-text">开始和AI对话吧！</div>
+        <div class="empty-subtext">我可以帮你解答各种问题</div>
       </div>
-      <div v-for="(msg, idx) in messages" :key="idx" :style="{textAlign: msg.role === 'assistant' ? 'left' : 'right', margin: '8px 0'}">
-        <div :style="{
-          background: msg.role === 'assistant' ? '#f0f0f0' : '#d6eaff', 
-          padding: '8px 12px', 
-          borderRadius: '8px', 
-          display: 'inline-block',
-          maxWidth: '80%',
-          wordBreak: 'break-word'
-        }">
-          <div v-if="msg.role === 'assistant'" style="font-size: 12px; color: #666; margin-bottom: 4px;">AI助手</div>
-          <div v-else style="font-size: 12px; color: #666; margin-bottom: 4px;">我</div>
-          <div>{{ msg.content }}</div>
-          <div style="font-size: 11px; color: #999; margin-top: 4px;">{{ formatTime(msg.createTime) }}</div>
+      <div v-else class="messages-list">
+        <div v-for="(msg, idx) in messages" :key="idx" class="message-item" :class="msg.role">
+          <div class="message-content">
+            <div class="message-header">
+              <span class="message-role">{{ msg.role === 'assistant' ? '🤖 AI助手' : '👤 我' }}</span>
+              <span class="message-time">{{ formatTime(msg.createTime) }}</span>
+            </div>
+            <div class="message-body" v-if="msg.role === 'assistant'" v-html="msg.content"></div>
+            <div class="message-body" v-else>{{ msg.content }}</div>
+          </div>
         </div>
       </div>
-      <div v-if="loading" style="text-align: center; padding: 10px;">
-        <a-spin size="small" />
-        <span style="margin-left: 8px; color: #666;">AI正在思考...</span>
+      <div v-if="loading" class="loading-state">
+        <div class="loading-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <span class="loading-text">AI正在思考...</span>
       </div>
     </div>
 
     <!-- 输入框 -->
-    <div style="display: flex; gap: 12px; align-items: center;">
-      <div style="flex: 1; position: relative;">
-        <a-input
+    <div class="input-container">
+      <div class="input-wrapper">
+        <input
           v-model="input"
           @input="handleInput"
           @keydown.enter="send"
           placeholder="和AI聊点什么吧…"
           :disabled="loading"
-          :style="{
-            borderRadius: '20px',
-            border: '2px solid #e8e8e8',
-            padding: '8px 16px',
-            fontSize: '14px',
-            transition: 'all 0.3s ease',
-            background: '#fafafa',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-          }"
-          @focus="handleInputFocus"
-          @blur="handleInputBlur"
+          class="chat-input"
         />
-        <div 
-          v-if="loading" 
-          style="
-            position: absolute; 
-            right: 12px; 
-            top: 50%; 
-            transform: translateY(-50%);
-            color: #1890ff;
-          "
-        >
-          <a-spin size="small" />
+        <div v-if="loading" class="input-loading">
+          <div class="loading-spinner"></div>
         </div>
       </div>
       
-      <a-button 
-        type="primary"
+      <button 
         @click="send"
         :disabled="loading || !input.trim()"
-        :style="{
-          borderRadius: '20px',
-          height: '40px',
-          padding: '0 20px',
-          border: 'none',
-          fontWeight: '500',
-          fontSize: '14px',
-          transition: 'all 0.3s ease',
-          background: input.trim() && !loading 
-            ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
-            : '#d9d9d9',
-          boxShadow: input.trim() && !loading 
-            ? '0 4px 15px rgba(102, 126, 234, 0.4), 0 2px 4px rgba(0,0,0,0.1)' 
-            : 'none',
-          transform: input.trim() && !loading ? 'translateY(0)' : 'translateY(0)'
-        }"
-        @mouseenter="handleSendButtonHover"
-        @mouseleave="handleSendButtonLeave"
+        class="send-btn"
+        :class="{ active: input.trim() && !loading }"
       >
-        <template #icon>
-          <span style="margin-right: 6px;">🚀</span>
-        </template>
-        发送
-      </a-button>
-      <a-button 
-        size="small" 
+        <span class="send-icon">🚀</span>
+        <span class="send-text">发送</span>
+      </button>
+      
+      <button 
         @click="toggleSessionList"
-        @mouseenter="handleButtonHover"
-        @mouseleave="handleButtonLeave"
-        :style="{
-          minWidth: '80px',
-          height: '32px',
-          borderRadius: '16px',
-          border: 'none',
-          color: 'white',
-          fontWeight: '500',
-          fontSize: '12px',
-          transition: 'all 0.3s ease',
-          background: showSessionList 
-            ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
-            : 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-          boxShadow: showSessionList 
-            ? '0 4px 15px rgba(102, 126, 234, 0.4), 0 2px 4px rgba(0,0,0,0.1)' 
-            : '0 4px 15px rgba(245, 87, 108, 0.4), 0 2px 4px rgba(0,0,0,0.1)'
-        }"
+        class="history-btn"
+        :class="{ active: showSessionList }"
       >
-        <template #icon>
-          <span v-if="showSessionList" style="margin-right: 4px;">📋</span>
-          <span v-else style="margin-right: 4px;">📚</span>
-        </template>
-        {{ showSessionList ? '隐藏' : '历史记录' }}
-      </a-button>
+        <span class="history-icon">{{ showSessionList ? '📋' : '📚' }}</span>
+        <span class="history-text">{{ showSessionList ? '隐藏' : '历史' }}</span>
+      </button>
     </div>
   </div>
 </template>
@@ -203,7 +150,7 @@ async function loadSessionList() {
 // 选择会话
 async function selectSession(session: AiChatSession) {
   console.log('🎯 选择会话:', session);
-  currentSessionId.value = session.id.toString();
+        currentSessionId.value = session.id?.toString() || null;
   await loadMessageHistory(currentSessionId.value);
   showSessionList.value = false;
 }
@@ -246,75 +193,11 @@ function createNewSession() {
   showSessionList.value = false;
 }
 
-// 按钮悬停效果
-function handleButtonHover(e: MouseEvent) {
-  const target = e.target as HTMLElement;
-  if (showSessionList.value) {
-    target.style.background = 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)';
-    target.style.transform = 'translateY(-2px)';
-    target.style.boxShadow = '0 8px 25px rgba(102, 126, 234, 0.6), 0 6px 12px rgba(0,0,0,0.2)';
-  } else {
-    target.style.background = 'linear-gradient(135deg, #e085f0 0%, #e54b5f 100%)';
-    target.style.transform = 'translateY(-2px)';
-    target.style.boxShadow = '0 8px 25px rgba(245, 87, 108, 0.6), 0 6px 12px rgba(0,0,0,0.2)';
-  }
-}
-
-// 按钮离开效果
-function handleButtonLeave(e: MouseEvent) {
-  const target = e.target as HTMLElement;
-  if (showSessionList.value) {
-    target.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-    target.style.transform = 'translateY(0)';
-    target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.4), 0 2px 4px rgba(0,0,0,0.1)';
-  } else {
-    target.style.background = 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
-    target.style.transform = 'translateY(0)';
-    target.style.boxShadow = '0 4px 15px rgba(245, 87, 108, 0.4), 0 2px 4px rgba(0,0,0,0.1)';
-  }
-}
-
 // 处理输入框输入
 function handleInput(e: Event) {
   const target = e.target as HTMLInputElement;
   input.value = target.value;
   console.log('📝 输入框值更新:', input.value);
-}
-
-// 输入框获得焦点
-function handleInputFocus(e: Event) {
-  const target = e.target as HTMLInputElement;
-  target.style.border = '2px solid #667eea';
-  target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.2), 0 2px 8px rgba(0,0,0,0.05)';
-  target.style.background = '#ffffff';
-}
-
-// 输入框失去焦点
-function handleInputBlur(e: Event) {
-  const target = e.target as HTMLInputElement;
-  target.style.border = '2px solid #e8e8e8';
-  target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
-  target.style.background = '#fafafa';
-}
-
-// 发送按钮悬停效果
-function handleSendButtonHover(e: MouseEvent) {
-  const target = e.target as HTMLElement;
-  if (input.value.trim() && !loading.value) {
-    target.style.background = 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)';
-    target.style.transform = 'translateY(-2px)';
-    target.style.boxShadow = '0 8px 25px rgba(102, 126, 234, 0.6), 0 6px 12px rgba(0,0,0,0.2)';
-  }
-}
-
-// 发送按钮离开效果
-function handleSendButtonLeave(e: MouseEvent) {
-  const target = e.target as HTMLElement;
-  if (input.value.trim() && !loading.value) {
-    target.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-    target.style.transform = 'translateY(0)';
-    target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.4), 0 2px 4px rgba(0,0,0,0.1)';
-  }
 }
 
 // 发送消息
@@ -418,4 +301,424 @@ onMounted(() => {
   loadSessionList();
   console.log('🎯 组件挂载完成，初始input值:', input.value);
 });
-</script> 
+</script>
+
+<style scoped>
+.ai-chat-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* 会话列表样式 */
+.session-list-container {
+  margin-bottom: 16px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 16px;
+  border: 1px solid rgba(91,134,229,0.2);
+  overflow: hidden;
+}
+
+.session-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(91,134,229,0.15) 0%, rgba(54,209,196,0.15) 100%);
+  border-bottom: 1px solid rgba(91,134,229,0.2);
+}
+
+.session-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: #fff;
+}
+
+.new-session-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #36d1c4 0%, #5b86e5 100%);
+  border: none;
+  border-radius: 20px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(54,209,196,0.3);
+}
+
+.new-session-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(54,209,196,0.4);
+}
+
+.session-list {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.session-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  margin: 4px 0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid transparent;
+}
+
+.session-item:hover {
+  background: rgba(91,134,229,0.15);
+  border-color: rgba(91,134,229,0.3);
+  transform: translateX(4px);
+}
+
+.session-item.active {
+  background: linear-gradient(135deg, rgba(91,134,229,0.2) 0%, rgba(54,209,196,0.2) 100%);
+  border-color: rgba(91,134,229,0.5);
+  box-shadow: 0 4px 12px rgba(91,134,229,0.2);
+}
+
+.session-info {
+  flex: 1;
+}
+
+.session-name {
+  font-weight: 500;
+  font-size: 15px;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.session-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+}
+
+.session-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #36d1c4;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.session-item.active .session-indicator {
+  opacity: 1;
+}
+
+/* 消息列表样式 */
+.messages-container {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 16px;
+  padding: 8px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.8;
+}
+
+.empty-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.empty-subtext {
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
+}
+
+.messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.message-item {
+  display: flex;
+  margin-bottom: 16px;
+}
+
+.message-item.user {
+  justify-content: flex-end;
+}
+
+.message-item.assistant {
+  justify-content: flex-start;
+}
+
+.message-content {
+  max-width: 80%;
+  padding: 12px 16px;
+  border-radius: 18px;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.message-item.user .message-content {
+  background: linear-gradient(135deg, #5b86e5 0%, #36d1c4 100%);
+  border-bottom-right-radius: 6px;
+}
+
+.message-item.assistant .message-content {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-bottom-left-radius: 6px;
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.message-role {
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+}
+
+.message-time {
+  color: rgba(255,255,255,0.6);
+}
+
+.message-body {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #fff;
+  word-break: break-word;
+}
+
+.message-body :deep(p) {
+  margin: 0 0 8px 0;
+}
+
+.message-body :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.message-body :deep(code) {
+  background: rgba(0,0,0,0.2);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 13px;
+}
+
+.message-body :deep(pre) {
+  background: rgba(0,0,0,0.3);
+  padding: 12px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+.message-body :deep(pre code) {
+  background: none;
+  padding: 0;
+}
+
+/* 加载状态样式 */
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+}
+
+.loading-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.loading-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #36d1c4;
+  animation: loadingDot 1.4s infinite ease-in-out;
+}
+
+.loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+.loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes loadingDot {
+  0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+.loading-text {
+  font-size: 14px;
+  color: rgba(255,255,255,0.8);
+}
+
+/* 输入区域样式 */
+.input-container {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 8px;
+}
+
+.input-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.chat-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 24px;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.chat-input::placeholder {
+  color: rgba(255,255,255,0.6);
+}
+
+.chat-input:focus {
+  border-color: rgba(91,134,229,0.6);
+  background: rgba(255,255,255,0.15);
+  box-shadow: 0 4px 16px rgba(91,134,229,0.2);
+}
+
+.chat-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.input-loading {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(91,134,229,0.3);
+  border-top: 2px solid #36d1c4;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: translateY(-50%) rotate(0deg); }
+  100% { transform: translateY(-50%) rotate(360deg); }
+}
+
+/* 按钮样式 */
+.send-btn, .history-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #fff;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.send-btn {
+  background: linear-gradient(135deg, rgba(91,134,229,0.3) 0%, rgba(54,209,196,0.3) 100%);
+  border-color: rgba(91,134,229,0.4);
+}
+
+.send-btn.active {
+  background: linear-gradient(135deg, #5b86e5 0%, #36d1c4 100%);
+  border-color: rgba(91,134,229,0.6);
+  box-shadow: 0 4px 16px rgba(91,134,229,0.3);
+  transform: translateY(-2px);
+}
+
+.send-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(91,134,229,0.4);
+}
+
+.send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.history-btn {
+  background: linear-gradient(135deg, rgba(245,87,108,0.3) 0%, rgba(240,147,251,0.3) 100%);
+  border-color: rgba(245,87,108,0.4);
+}
+
+.history-btn.active {
+  background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+  border-color: rgba(245,87,108,0.6);
+  box-shadow: 0 4px 16px rgba(245,87,108,0.3);
+  transform: translateY(-2px);
+}
+
+.history-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245,87,108,0.4);
+}
+
+/* 滚动条样式 */
+.session-list::-webkit-scrollbar,
+.messages-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.session-list::-webkit-scrollbar-track,
+.messages-container::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.05);
+  border-radius: 3px;
+}
+
+.session-list::-webkit-scrollbar-thumb,
+.messages-container::-webkit-scrollbar-thumb {
+  background: rgba(91,134,229,0.3);
+  border-radius: 3px;
+}
+
+.session-list::-webkit-scrollbar-thumb:hover,
+.messages-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(91,134,229,0.5);
+}
+</style> 
